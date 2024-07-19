@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\HasilProduk;
 use App\Models\LogOpc;
 use App\Models\Penjualan;
 use Exception;
@@ -25,7 +26,8 @@ class PenjualanController extends Controller
      */
     public function create()
     {
-        return view('penjualan.add-penjualan');
+        $mateng=HasilProduk::whereIn('id',[1,3,4])->get();
+        return view('penjualan.add-penjualan',compact('mateng'));
     }
 
     /**
@@ -182,5 +184,12 @@ class PenjualanController extends Controller
         $penjualan=Penjualan::where('id',$de_id)->get();
 
         return view('penjualan.detail_penjualan',compact('penjualan','id'));
+    }
+
+    public function printPenjualan($id){
+        $de_id=Crypt::decrypt($id);//id penjualan
+        $penjualan=Penjualan::where('id',$de_id)->get();
+
+        return view('penjualan.print_penjualan',compact('penjualan','id'));
     }
 }

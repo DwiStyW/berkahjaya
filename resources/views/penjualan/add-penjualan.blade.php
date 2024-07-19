@@ -56,8 +56,12 @@
                             <div class="mb-3 row">
                                 <label for="grade" class="col-md-2 col-form-label">Grade</label>
                                 <div class="col-md-10">
-                                    <input class="form-control" type="text" placeholder="Grade" id="grade"
-                                        name="grade">
+                                    <select class="form-control select2" name="grade" id="grade">
+                                        <option value="" disabled selected>Pilih Grade</option>
+                                        @foreach ($mateng as $m)
+                                            <option value="{{ $m->id }}">{{ $m->hasil_produksi }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                             <div class="mb-3 row">

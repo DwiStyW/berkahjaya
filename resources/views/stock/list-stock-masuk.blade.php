@@ -75,7 +75,6 @@
                                 $no = 1;
                             @endphp
                             @if (count($stock) != 0)
-                                {
                                 @foreach ($stock as $item)
                                     @php
                                         if ($item->ket == 'masuk') {
@@ -158,7 +157,7 @@
                                                 $saldomutasi1H = $sals1H + $saldoHM - $saldoHK;
                                             @endphp
                                             <td>
-                                                {{ $saldomutasi1V }}
+                                                {{ round($saldomutasi1V, 4) }}
                                             </td>
                                             <td>
                                                 {{ 'Rp ' . number_format($saldomutasi1H, 0, ',', '.') }}
@@ -170,7 +169,7 @@
                         <tfoot>
                             <tr>
                                 <td colspan="7">Saldo Akhir</td>
-                                <td>{{ $saldomutasi1V }}</td>
+                                <td>{{ round($saldomutasi1V, 4) }}</td>
                                 <td>{{ 'Rp ' . number_format($saldomutasi1H, 0, ',', '.') }}</td>
                             </tr>
                         </tfoot>

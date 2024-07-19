@@ -94,6 +94,7 @@ Route::middleware('auth')->group(function () {
         // penjualan
     Route::get('/penjualan', [PenjualanController::class, 'index'])->name('penjualan.index');
     Route::get('/penjualan-detail/{id}', [PenjualanController::class, 'detail_penjualan'])->name('penjualan.detail');
+    Route::get('/printPenjualan/{id}', [PenjualanController::class, 'printPenjualan'])->name('penjualan.detail');
     Route::get('/penjualan-add', [PenjualanController::class, 'create'])->name('penjualan.add');
     Route::post('/penjualan-store', [PenjualanController::class, 'store'])->name('penjualan.store');
     Route::get('/penjualan-edit/{id}', [PenjualanController::class, 'edit'])->name('penjualan.edit');

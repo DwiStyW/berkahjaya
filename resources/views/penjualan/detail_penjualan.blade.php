@@ -51,7 +51,7 @@
                     <div class="card-body ms-5 me-5 mt-3">
                         <div class="position-absolute" style="right:0;margin-right:20px">
 
-                            <a href="/printPembelian/{{ $id }}" target="_blank" class="btn btn-sm btn-warning">
+                            <a href="/printPenjualan/{{ $id }}" target="_blank" class="btn btn-sm btn-warning">
                                 <i class="uil uil-print"></i>
                                 Cetak
                             </a>

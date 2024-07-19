@@ -34,7 +34,7 @@
                                 <th rowspan="2">Tanggal</th>
                                 <th rowspan="2">Supplier</th>
                                 <th rowspan="2">Persentase</th>
-                                <th rowspan="2">Log OPC</th>
+                                <th rowspan="2">Log/m3</th>
                                 @if (Auth::user()->role == '1')
                                     <th rowspan="2">Harga</th>
                                     <th colspan="3">OPC</th>

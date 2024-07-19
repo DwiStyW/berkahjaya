@@ -159,7 +159,7 @@
                                     {{-- <th rowspan="2">No</th> --}}
                                     <th rowspan="2">Tanggal</th>
                                     <th rowspan="2">Supplier</th>
-                                    <th rowspan="2">Log OPC</th>
+                                    <th rowspan="2">Log/m3</th>
                                     <th colspan="2">OPC</th>
                                     <th colspan="2">OPC B</th>
                                     <th colspan="1">PPC</th>
