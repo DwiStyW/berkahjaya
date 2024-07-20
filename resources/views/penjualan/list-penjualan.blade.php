@@ -57,6 +57,7 @@
                                 <th>No</th>
                                 <th>Tanggal</th>
                                 <th>Buyer</th>
+                                <th>Grade</th>
                                 <th>Uraian</th>
                                 <th>Total Harga</th>
                                 <th>Aksi</th>
@@ -71,6 +72,7 @@
                                     <td>{{ $no++ }}</td>
                                     <td>{{ $item->tanggal }}</td>
                                     <td>{{ $item->supplier }}</td>
+                                    <td>{{ $item->grade }}</td>
                                     <td>{{ $item->vol_m3 }}</td>
                                     <td>{{ $item->total_harga }}</td>
                                     <td>
@@ -112,7 +114,7 @@
             var table = $('#datatable').DataTable({
                 columnDefs: [{
                     render: $.fn.dataTable.render.number('.', ',', 0, 'Rp '),
-                    targets: [4]
+                    targets: [5]
                 }]
             });
         });

@@ -14,6 +14,7 @@ class Penjualan extends Model
         'tanggal',
         'supplier',
         'alamat',
+        'id_master',
         'grade',
         'jenis_kayu',
         'ukuran1',

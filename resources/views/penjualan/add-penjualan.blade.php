@@ -9,6 +9,7 @@
     <link href="{{ URL::asset('/assets/libs/bootstrap-datepicker/bootstrap-datepicker.min.css') }}" rel="stylesheet">
     <link href="{{ URL::asset('/assets/libs/bootstrap-touchspin/bootstrap-touchspin.min.css') }}" rel="stylesheet" />
     <link rel="stylesheet" href="{{ URL::asset('/assets/libs/datepicker/datepicker.min.css') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
 @endsection
 @section('content')
     @component('common-components.breadcrumb')
@@ -56,8 +57,9 @@
                             <div class="mb-3 row">
                                 <label for="grade" class="col-md-2 col-form-label">Grade</label>
                                 <div class="col-md-10">
-                                    <select class="form-control select2" name="grade" id="grade">
-                                        <option value="" disabled selected>Pilih Grade</option>
+                                    <select class="form-control select2" name="grade" id="grade" required>
+                                        <option value="" disabled selected onchange="pilih_grade()">Pilih Grade
+                                        </option>
                                         @foreach ($mateng as $m)
                                             <option value="{{ $m->id }}">{{ $m->hasil_produksi }}</option>
                                         @endforeach
@@ -82,7 +84,7 @@
                                             onchange="hitungVol()" required name="ukuran2">
                                         <span class="input-group-text">*</span>
                                         <input class="form-control" type="text" placeholder="000" id="ukuran3"
-                                            onchange="hitungVol()" required name="ukuran3">
+                                            oninput="hitungVol()" required name="ukuran3">
                                     </div>
                                 </div>
                             </div>
@@ -90,7 +92,7 @@
                                 <label for="pcs" class="col-md-2 col-form-label">Pcs</label>
                                 <div class="col-md-10">
                                     <input class="form-control" type="text" placeholder="000" id="pcs"
-                                        onchange="hitungVol()" name="pcs">
+                                        oninput="hitungVol()" name="pcs">
                                 </div>
                             </div>
                             <div class="mb-3 row">
@@ -142,6 +144,12 @@
     <script src="{{ URL::asset('/assets/libs/datepicker/datepicker.min.js') }}"></script>
     <script src="{{ URL::asset('/assets/js/pages/form-advanced.init.js') }}"></script>
     <script>
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
         function hitungVol() {
             var ukuran1 = document.getElementById('ukuran1').value;
             var ukuran2 = document.getElementById('ukuran2').value;
@@ -163,7 +171,7 @@
                 style: "currency",
                 currency: "IDR"
             }).format(total);
-            console.log(harga);
+            console.log(total);
             document.getElementById('total_harga').value = rupiah
         }
 

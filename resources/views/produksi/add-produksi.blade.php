@@ -9,6 +9,7 @@
     <link href="{{ URL::asset('/assets/libs/bootstrap-datepicker/bootstrap-datepicker.min.css') }}" rel="stylesheet">
     <link href="{{ URL::asset('/assets/libs/bootstrap-touchspin/bootstrap-touchspin.min.css') }}" rel="stylesheet" />
     <link rel="stylesheet" href="{{ URL::asset('/assets/libs/datepicker/datepicker.min.css') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
 @endsection
 @section('content')
     @component('common-components.breadcrumb')
@@ -61,7 +62,14 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <div id="logm3"></div>
+                                <div class="d-flex col-12">
+                                    <div class="col-6">
+                                        <div id="logm3"></div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div id="detailm3"></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="mb-3 row">
@@ -183,6 +191,11 @@
     <script src="{{ URL::asset('/assets/libs/datepicker/datepicker.min.js') }}"></script>
     <script src="{{ URL::asset('/assets/js/pages/form-advanced.init.js') }}"></script>
     <script>
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
         var data_produk = @json($masterproduk);
 
         function ukuranproduk() {
@@ -246,14 +259,16 @@
             localStorage.setItem("supplier", selected);
 
             let logfind = [];
+            let kodeMasuk = [];
             for (i = 0; i < selected.length; i++) {
                 var log = log_opc.find(x => x.id == selected[i]);
                 logfind.push(Number(log.uraian));
+                kodeMasuk.push(log.kode);
             }
-            console.log(logfind);
+            // console.log(logfind);
             let sum = 0;
             logfind.forEach((el) => sum += el);
-            console.log(sum);
+            // console.log(sum);
             if (sum > 0) {
                 str = '<div class=" mt-3 col-12">';
                 str += '<span class="input-group-text">' + sum.toFixed(4) + '</span>';
@@ -263,6 +278,58 @@
             }
 
             document.getElementById('logm3').innerHTML = str;
+            console.log(kodeMasuk);
+
+            // grupby
+            const groupBy = (keys) => (array) =>
+                array.reduce((objectsByKeyValue, obj) => {
+                    const value = keys.map((key) => obj[key]).join("-");
+                    objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj);
+                    return objectsByKeyValue;
+                }, {});
+            const gnoform = groupBy(['id_master_mentah']);
+
+            $.ajax({
+                type: 'POST',
+                url: "{{ route('getDetailpembelian') }}",
+                data: {
+                    kode: kodeMasuk,
+                },
+                success: function(data) {
+                    datasem = [];
+
+                    for (let [id_master_mentah, detail] of Object.entries(gnoform(data))) {
+                        // console.log(detail);
+                        sumvol = 0;
+                        detail.forEach((el) => sumvol += Number(el.vol));
+                        datasem.push({
+                            id_master: id_master_mentah,
+                            jenis: detail[0].jenis_muatan,
+                            sum: sumvol.toFixed(4)
+                        })
+                    }
+                    // console.log(datasem);
+                    let html = '<div class=" mt-3 form-control">';
+                    for (n = 0; n < datasem.length; n++) {
+                        html += '<div class="d-flex">';
+                        html += '<div class="col-6">';
+                        html += '<h6>' + datasem[n].jenis + '</h6>';
+                        html += '</div>';
+                        html += '<div class="col-6">';
+                        html += '<h6>' + datasem[n].sum + '</h6>';
+                        html += '</div>';
+                        html += '</div>';
+
+                    }
+                    html += '</div>';
+
+                    document.getElementById('detailm3').innerHTML = html;
+
+                },
+                error: function(data) {
+                    document.getElementById('detailm3').innerHTML = '';
+                }
+            })
 
         }
 

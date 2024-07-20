@@ -66,6 +66,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/produksi-temporary-delete/{id}', [ProduksiController::class, 'destroy_temporary'])->name('produksi.delete_temporary');
     Route::get('/produksi-temporary-perkode-delete/{id}/{kode}', [ProduksiController::class, 'destroy_temporary_perkode'])->name('produksi.delete_temporary_perkode');
 
+
     // logopc
     Route::get('/logopc', [LogopcController::class, 'index'])->name('logopc.index');
     Route::get('/logopc-add', [LogopcController::class, 'create'])->name('logopc.add');
@@ -83,13 +84,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/pembelian-add', [PembelianController::class, 'create'])->name('pembelian.add');
     Route::get('/pembelian-store', [PembelianController::class, 'store'])->name('pembelian.store');
     Route::get('/pembelian-edit/{id}', [PembelianController::class, 'edit'])->name('pembelian.edit');
-    Route::post('/pembelian-update/{id}', [PembelianController::class, 'update'])->name('pembelian.update');
+    Route::get('/pembelian-update/{id}', [PembelianController::class, 'update'])->name('pembelian.update');
     Route::get('/pembelian-delete/{id}', [PembelianController::class, 'destroy'])->name('pembelian.delete');
     Route::get('/detailpembelian-delete/{id}', [PembelianController::class, 'detail_destroy'])->name('detailpembelian.delete');
     Route::post('/getModel', [PembelianController::class, 'getModel'])->name('getModel');
     Route::post('/getDetailmodel', [PembelianController::class, 'getDetailmodel'])->name('getDetailmodel');
     Route::post('/detailpembelian-store', [PembelianController::class, 'detail_store'])->name('detailpembelian.store');
     Route::post('/detailpembelian-perkode-edit/{id}', [PembelianController::class, 'detail_update_store'])->name('detailpembelian.update');
+    Route::post('/getDetailpembelian', [PembelianController::class, 'getDetailpembelian'])->name('getDetailpembelian');
 
         // penjualan
     Route::get('/penjualan', [PenjualanController::class, 'index'])->name('penjualan.index');
@@ -109,8 +111,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // stock
+    Route::get('/stockbaku', [StockController::class, 'stock_baku'])->name('stockbaku');
     Route::get('/stockmasuk', [StockController::class, 'stock_masuk'])->name('stockmasuk');
     Route::get('/stockmasukkeras', [StockController::class, 'stock_masuk_keras'])->name('stockmasukkeras');
+    Route::get('/stockopc', [StockController::class, 'stock_opc'])->name('stockopc');
+    Route::get('/stockppc', [StockController::class, 'stock_ppc'])->name('stockppc');
+    Route::get('/stockmk', [StockController::class, 'stock_mk'])->name('stockmk');
 });
 
 require __DIR__.'/auth.php';

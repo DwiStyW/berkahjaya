@@ -292,41 +292,199 @@ class PembelianController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update( $id)
     {
-        $de_id=Crypt::decrypt($id);
-        $pembelian=Pembelian::where('id',$de_id)->get();
-        foreach($pembelian as $p){}
-        $kodePembelian=$p->kode_pembelian;
-
-        $cekLog=LogOpc::where('kode',$kodePembelian)->where('status','L')->get();
+        $kode=Crypt::decrypt($id);
+        $cekLog=LogOpc::where('kode',$kode)->where('status','L')->get();
         if(count($cekLog)==0){
-            $harga=(int)preg_replace("/([^0-9\\,])/i", "", $request->harga);
+            DB::beginTransaction();
+
+            DetailPembelian::where('kode_pembelian',$kode)->update(['kode_pembelian'=>null]);
+            Pembelian::where('kode_pembelian',$kode)->delete();
+            LogOpc::where('kode',$kode)->delete();
+            StockLogMasuk::where('kode',$kode)->delete();
+            StockLogMasukKeras::where('kode',$kode)->delete();
+            StockLogMasukKeras260::where('kode',$kode)->delete();
+            StockLogMasukSengon260::where('kode',$kode)->delete();
+
+            $data_detail_pembelian=DetailPembelian::where('kode_pembelian',null)->get();
+            // dd($data_detail_pembelian);
+            $arr_vol=[];
+            $arr_total=[];
+            $arr_Vsuper=[];
+            $arr_Vsengon260=[];
+            $arr_Vkeras260=[];
+            $arr_Vkeras=[];
+            $arr_Hsuper=[];
+            $arr_Hsengon260=[];
+            $arr_Hkeras260=[];
+            $arr_Hkeras=[];
+            foreach($data_detail_pembelian as $ddp){
+                array_push($arr_vol,$ddp->vol);
+                array_push($arr_total,$ddp->total_harga);
+                if($ddp->id_master_mentah=='1'){
+                    array_push($arr_Vsuper,$ddp->vol);
+                    array_push($arr_Hsuper,$ddp->total_harga);
+                }else if($ddp->id_master_mentah=='2'){
+                    array_push($arr_Vsengon260,$ddp->vol);
+                    array_push($arr_Hsengon260,$ddp->total_harga);
+                }else if($ddp->id_master_mentah=='3'){
+                    array_push($arr_Vkeras260,$ddp->vol);
+                    array_push($arr_Hkeras260,$ddp->total_harga);
+                }else if($ddp->id_master_mentah=='4'){
+                    array_push($arr_Vkeras,$ddp->vol);
+                    array_push($arr_Hkeras,$ddp->total_harga);
+                }
+            }
+            $sum_vol=array_sum($arr_vol);
+            $sum_total=array_sum($arr_total);
+            $sum_Vsuper=array_sum($arr_Vsuper);
+            $sum_Vsengon260=array_sum($arr_Vsengon260);
+            $sum_Vkeras260=array_sum($arr_Vkeras260);
+            $sum_Vkeras=array_sum($arr_Vkeras);
+            $sum_Hsuper=array_sum($arr_Hsuper);
+            $sum_Hsengon260=array_sum($arr_Hsengon260);
+            $sum_Hkeras260=array_sum($arr_Hkeras260);
+            $sum_Hkeras=array_sum($arr_Hkeras);
+
+            // dd($sum_Vsuper,$sum_Vsengon260,$sum_Vkeras260,$sum_Vkeras);
+            $request_tanggal=$ddp->tanggal;
+            // $newDate = date("Y-m-d", strtotime($request_tanggal));
+
+            $kode_bulan=date("My", strtotime($request_tanggal));
+            // // dump($kode_bulan);
+            $carikode=Pembelian::where('kode_pembelian','like','%B'.$kode_bulan.'%')->orderby('id','desc')->limit(1)->get();
+            // // dump(count($carikode));
+            if(count($carikode)==0){
+                $kode='B'.$kode_bulan.'001';
+            }else{
+                foreach ($carikode as $ck){}
+                $no_urut=sprintf("%03s",(int)substr($ck->kode_pembelian,-3)+1);
+                $kode='B'.$kode_bulan.$no_urut;
+            }
+
+            // dd($kode);
+            // $harga=(int)preg_replace("/([^0-9\\,])/i", "", $request->harga);
             $dataPembelian=[
-                'supplier'=>$request->supplier,
-                'vol'=>$request->vol,
-                'total_harga'=>$harga,
+                'kode_pembelian'=>$kode,
+                'tanggal'=>$request_tanggal,
+                'supplier'=>$ddp->supplier,
+                'vol'=>$sum_vol,
+                'total_harga'=>$sum_total,
             ];
+            // dd($dataPembelian);
+            // $dataLog=[
+            //     'kode'=>$kode,
+            //     'tanggal'=>$request_tanggal,
+            //     'supplier'=>$ddp->supplier,
+            //     'uraian'=>$sum_vol,
+            //     'harga'=>$sum_total,
+            //     'ket'=>'beli',
+            // ];
             $dataLog=[
-                'supplier'=>$request->supplier,
-                'uraian'=>$request->vol,
-                'harga'=>$harga,
+                'kode'=>$kode,
+                'tanggal'=>$request_tanggal,
+                'supplier'=>$ddp->supplier,
+                'uraian'=>$sum_Vsuper+$sum_Vkeras,
+                // 'uraian'=>$sum_vol,
+                'harga'=>$sum_Hsuper+$sum_Hkeras,
+                // 'harga'=>$sum_total,
+                'ket'=>'beli',
+            ];
+            // dd($dataLog);
+            $dataStockLogMasuk=[
+                'kode'=>$kode,
+                'tanggal'=>$request_tanggal,
+                'supplier'=>$ddp->supplier,
+                'volume'=>$sum_Vsuper,
+                'harga'=>$sum_Hsuper,
+                'ket'=>'masuk',
+            ];
+            $dataStockLogMasukSengon260=[
+                'kode'=>$kode,
+                'tanggal'=>$request_tanggal,
+                'supplier'=>$ddp->supplier,
+                'volume'=>$sum_Vsengon260,
+                'harga'=>$sum_Hsengon260,
+                'ket'=>'masuk',
+            ];
+            $dataStockLogMasukKeras260=[
+                'kode'=>$kode,
+                'tanggal'=>$request_tanggal,
+                'supplier'=>$ddp->supplier,
+                'volume'=>$sum_Vkeras260,
+                'harga'=>$sum_Hkeras260,
+                'ket'=>'masuk',
+            ];
+            $dataStockLogMasukKeras=[
+                'kode'=>$kode,
+                'tanggal'=>$request_tanggal,
+                'supplier'=>$ddp->supplier,
+                'volume'=>$sum_Vkeras,
+                'harga'=>$sum_Hkeras,
+                'ket'=>'masuk',
             ];
 
-            DB::beginTransaction();
+            // // dd($dataPembelian);
+            // DB::beginTransaction();
             try{
-                Pembelian::where('id',$de_id)->update($dataPembelian);
-                LogOpc::where('kode',$kodePembelian)->update($dataLog);
+                Pembelian::create($dataPembelian);
+                LogOpc::create($dataLog);
+                if($sum_Vsuper!=0){
+                    StockLogMasuk::create($dataStockLogMasuk);
+                }
+                if($sum_Vsengon260!=0){
+                    StockLogMasukSengon260::create($dataStockLogMasukSengon260);
+                }
+                if($sum_Vkeras260!=0){
+                    StockLogMasukKeras260::create($dataStockLogMasukKeras260);
+                }
+                if($sum_Vkeras!=0){
+                    StockLogMasukKeras::create($dataStockLogMasukKeras);
+                }
+                DetailPembelian::where('kode_pembelian',null)->update(['kode_pembelian'=>$kode]);
                 DB::commit();
-                return redirect("/pembelian")->with('success','Data berhasil diubah!');
+                return redirect("/pembelian")->with('success','Data berhasil ditambahkan!');
             }catch(Exception $e){
                 DB::rollback();
                 dd($e);
-                return redirect("/pembelian")->with('failed','Data gagal diubah!');
+                return redirect("/pembelian")->with('failed','Data gagal ditambahkan!');
             }
         }else{
             return redirect("/pembelian")->with('failed','Data gagal diubah!, Data telah diproduksi, hapus data produksi terlebih dahulu.!');
         }
+        // $pembelian=Pembelian::where('id',$de_id)->get();
+        // foreach($pembelian as $p){}
+        // $kodePembelian=$p->kode_pembelian;
+
+
+        // if(count($cekLog)==0){
+        //     $harga=(int)preg_replace("/([^0-9\\,])/i", "", $request->harga);
+        //     $dataPembelian=[
+        //         'supplier'=>$request->supplier,
+        //         'vol'=>$request->vol,
+        //         'total_harga'=>$harga,
+        //     ];
+        //     $dataLog=[
+        //         'supplier'=>$request->supplier,
+        //         'uraian'=>$request->vol,
+        //         'harga'=>$harga,
+        //     ];
+
+        //     DB::beginTransaction();
+        //     try{
+        //         Pembelian::where('id',$de_id)->update($dataPembelian);
+        //         LogOpc::where('kode',$kodePembelian)->update($dataLog);
+        //         DB::commit();
+        //         return redirect("/pembelian")->with('success','Data berhasil diubah!');
+        //     }catch(Exception $e){
+        //         DB::rollback();
+        //         dd($e);
+        //         return redirect("/pembelian")->with('failed','Data gagal diubah!');
+        //     }
+        // }else{
+        //     return redirect("/pembelian")->with('failed','Data gagal diubah!, Data telah diproduksi, hapus data produksi terlebih dahulu.!');
+        // }
         // dump($dataPembelian);
     }
 
@@ -538,11 +696,13 @@ class PembelianController extends Controller
             'kode'=>$kode,
             'tanggal'=>$request_tanggal,
             'supplier'=>$ddp->supplier,
-            'uraian'=>$sum_vol,
-            'harga'=>$sum_total,
+            'uraian'=>$sum_Vsuper+$sum_Vkeras,
+            // 'uraian'=>$sum_vol,
+            'harga'=>$sum_Hsuper+$sum_Hkeras,
+            // 'harga'=>$sum_total,
             'ket'=>'beli',
         ];
-
+        // dd($dataLog);
         $dataStockLogMasuk=[
             'kode'=>$kode,
             'tanggal'=>$request_tanggal,
@@ -602,5 +762,12 @@ class PembelianController extends Controller
             return redirect("/pembelian")->with('failed','Data gagal ditambahkan!');
         }
     }
-
+    public function getDetailpembelian(Request $requset){
+        $detailPembelian=DetailPembelian::whereIn('kode_pembelian',$requset->kode)
+            ->where('id_master_mentah','!=',[2,3])
+            ->join('master_mentah','master_mentah.id','=','id_master_mentah')
+            ->select('detail_pembelian.*','master_mentah.jenis_muatan as jenis_muatan')
+            ->get();
+        return $detailPembelian;
+    }
 }

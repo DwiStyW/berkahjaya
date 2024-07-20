@@ -96,14 +96,14 @@
                                             <td>{{ $item->supplier }}</td>
                                             @if ($item->ket == 'masuk')
                                                 <td>{{ $item->volume }}</td>
-                                                <td>{{ $item->harga }}</td>
+                                                <td>{{ 'Rp ' . number_format($item->harga, 0, ',', '.') }}</td>
                                             @else
                                                 <td></td>
                                                 <td></td>
                                             @endif
                                             @if ($item->ket == 'keluar')
                                                 <td>{{ $item->volume }}</td>
-                                                <td>{{ $item->harga }}</td>
+                                                <td>{{ 'Rp ' . number_format($item->harga, 0, ',', '.') }}</td>
                                             @else
                                                 <td></td>
                                                 <td></td>
@@ -136,14 +136,14 @@
                                             <td>{{ $item->supplier }}</td>
                                             @if ($item->ket == 'masuk')
                                                 <td>{{ $item->volume }}</td>
-                                                <td>{{ $item->harga }}</td>
+                                                <td>{{ 'Rp ' . number_format($item->harga, 0, ',', '.') }}</td>
                                             @else
                                                 <td></td>
                                                 <td></td>
                                             @endif
                                             @if ($item->ket == 'keluar')
                                                 <td>{{ $item->volume }}</td>
-                                                <td>{{ $item->harga }}</td>
+                                                <td>{{ 'Rp ' . number_format($item->harga, 0, ',', '.') }}</td>
                                             @else
                                                 <td></td>
                                                 <td></td>
@@ -180,7 +180,6 @@
             </div>
         </div> <!-- end col -->
     </div> <!-- end row -->
-    @include('master-mentah.delete-master-mentah')
 @endsection
 @section('script')
     <script src="{{ URL::asset('/assets/libs/datatables/datatables.min.js') }}"></script>
@@ -191,6 +190,7 @@
         $(document).ready(function() {
             var table = $('#datatable').DataTable({
                 dom: '<"table-responsive w-100"<t>>',
+                paging: false,
                 // columnDefs: [{
                 //     render: $.fn.dataTable.render.number('.', ',', 0, 'Rp '),
                 //     targets: [3]

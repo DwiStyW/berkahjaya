@@ -174,8 +174,8 @@
                             </div>
                         @endforeach
                         <div class="float-end">
-                            <a href="/pembelian-store" onclick="resetVal()" id="simpan_produksi"
-                                class="btn btn-md btn-primary">Simpan</a>
+                            <a href="/pembelian-update/{{ Crypt::encrypt($p->kode_pembelian) }}" onclick="resetVal()"
+                                id="simpan_produksi" class="btn btn-md btn-primary">Simpan</a>
                         </div>
                     </div>
                 </div>

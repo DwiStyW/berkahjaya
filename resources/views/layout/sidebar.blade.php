@@ -93,12 +93,12 @@
                         </a>
                     </li>
                 @endif
-                <li>
+                {{-- <li>
                     <a href="{{ url('/logopc') }}">
                         <i class="uil-files-landscapes"></i>
                         <span>Log OPC</span>
                     </a>
-                </li>
+                </li> --}}
                 {{-- <li>
                     <a href="javascript: void(0);" class="has-arrow waves-effect">
                         <i class="uil-files-landscapes"></i>
@@ -111,16 +111,34 @@
                     </ul>
                 </li> --}}
                 <li>
-                    <a href="javascript: void(0);" class="has-arrow waves-effect">
-                        <i class="uil-files-landscapes"></i>
+                    <a href="{{ url('/stockbaku') }}">
+                        <i class="uil-file-landscape"></i>
                         <span>Stock</span>
                     </a>
+                </li>
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="uil-files-landscapes"></i>
+                        <span>Stock Baku</span>
+                    </a>
                     <ul class="sub-menu" aria-expanded="false">
+                        {{-- <li><a href="/stockbaku">Stock</a></li> --}}
                         <li><a href="/stockmasuk">Stock Log Masuk</a></li>
                         <li><a href="/stockmasukkeras">Stock Log Masuk Keras</a></li>
+                        {{-- <li><a href="/stockmasukkeras">Stock Log Masuk Sengon</a></li> --}}
                     </ul>
                 </li>
-
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="uil-files-landscapes"></i>
+                        <span>Stock Siap Jual</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="/stockopc">Stock OPC</a></li>
+                        <li><a href="/stockppc">Stock PPC</a></li>
+                        <li><a href="/stockmk">Stock MK</a></li>
+                    </ul>
+                </li>
             </ul>
         </div>
         <!-- Sidebar -->

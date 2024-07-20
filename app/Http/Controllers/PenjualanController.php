@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\HasilProduk;
 use App\Models\LogOpc;
 use App\Models\Penjualan;
+use App\Models\StockLogMk;
+use App\Models\StockLogOpc;
+use App\Models\StockLogPpc;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -52,12 +55,16 @@ class PenjualanController extends Controller
         $harga=(int)preg_replace("/([^0-9\\,])/i", "", $request->harga);
         $total_harga=(int)preg_replace("/([^0-9\\,])/i", "", $request->total_harga);
 
+        $master=HasilProduk::where('id',$request->grade)->get();
+        foreach($master as $m){}
+        // dd($master);
         $dataPenjualan=[
             'kode_penjualan'=>$kode,
             'tanggal'=>$newDate,
             'supplier'=>$request->supplier,
             'alamat'=>$request->alamat,
-            'grade'=>$request->grade,
+            'id_master'=>$request->grade,
+            'grade'=>$m->hasil_produksi,
             'jenis_kayu'=>$request->jenis_kayu,
             'ukuran1'=>$request->ukuran1,
             'ukuran2'=>$request->ukuran2,
@@ -76,11 +83,26 @@ class PenjualanController extends Controller
             'harga'=>$total_harga,
             'ket'=>'jual',
         ];
+        $dataStock=[
+            'kode'=>$kode,
+            'tanggal'=>$newDate,
+            'supplier'=>$request->supplier,
+            'volume'=>$request->vol,
+            'harga'=>$total_harga,
+            'ket'=>'keluar',
+        ];
         // dd($dataPenjualan);
         DB::beginTransaction();
         try{
             Penjualan::create($dataPenjualan);
             LogOpc::create($dataLog);
+            if($m->id==1){
+                StockLogOpc::create($dataStock);
+            }else if($m->id==3){
+                StockLogPpc::create($dataStock);
+            }else if($m->id==4){
+                StockLogMk::create($dataStock);
+            }
             DB::commit();
             return redirect("/penjualan")->with('success','Data berhasil ditambahkan!');
         }catch(Exception $e){
