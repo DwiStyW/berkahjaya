@@ -289,8 +289,8 @@ class ProduksiController extends Controller
                 }
             }
             StockLogOpc::create($dataStockOpc);
-            StockLogPpc::create($dataStockPpc);
-            StockLogMk::create($dataStockMk);
+
+
 
             // END STOCK
             Produksi::insert($dataOPC);
@@ -338,6 +338,7 @@ class ProduksiController extends Controller
                 ];
                 Produksi::where('id',$dp->id)->update($dataPPC);
                 Temporary::where('id',$ppc->id)->update(['status'=>'move']);
+                StockLogPpc::create($dataStockPpc);
             }
             // cari mk
             $cariMK=Temporary::where('tanggal',$opc->tanggal)
@@ -355,6 +356,7 @@ class ProduksiController extends Controller
                 ];
                 Produksi::where('id',$dp->id)->update($dataMK);
                 Temporary::where('id',$mk->id)->update(['status'=>'move']);
+                StockLogMk::create($dataStockMk);
             }
             // cari ompulur
             $cariAmpulur=Temporary::where('tanggal',$opc->tanggal)

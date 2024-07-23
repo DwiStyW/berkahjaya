@@ -18,6 +18,7 @@ class StockController extends Controller
         $stockopc=StockLogOpc::get();
         $stockppc=StockLogPpc::get();
         $stockmk=StockLogMk::get();
+        // dd($logmasuk);
         return view('stock.list-stock-baku-global',compact('logmasuk','logmasukkeras','stockopc','stockppc','stockmk'));
     }
     public function stock_masuk(){
@@ -91,5 +92,16 @@ class StockController extends Controller
         // $saldo_Hakhir=$stockMasuk->sum('harga')-$stockKeluar->sum('harga');
         // dd($saldo_akhir);
         return view('stock.list-stock-jadi-opc',compact('stock'));
+    }
+
+    public function getStock(Request $request){
+        if($request->id==1){
+            $stock=StockLogOpc::get();
+        }else if($request->id==3){
+            $stock=StockLogPpc::get();
+        }else if($request->id==4){
+            $stock=StockLogMk::get();
+        }
+        return $stock;
     }
 }

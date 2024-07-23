@@ -385,10 +385,10 @@ class PembelianController extends Controller
                 'kode'=>$kode,
                 'tanggal'=>$request_tanggal,
                 'supplier'=>$ddp->supplier,
-                'uraian'=>$sum_Vsuper+$sum_Vkeras,
-                // 'uraian'=>$sum_vol,
-                'harga'=>$sum_Hsuper+$sum_Hkeras,
-                // 'harga'=>$sum_total,
+                // 'uraian'=>$sum_Vsuper+$sum_Vkeras,
+                'uraian'=>$sum_vol,
+                // 'harga'=>$sum_Hsuper+$sum_Hkeras,
+                'harga'=>$sum_total,
                 'ket'=>'beli',
             ];
             // dd($dataLog);
@@ -504,6 +504,10 @@ class PembelianController extends Controller
             try{
                 Pembelian::where('id',$de_id)->delete();
                 LogOpc::where('kode',$kodePembelian)->delete();
+                StockLogMasuk::where('kode',$kodePembelian)->delete();
+                StockLogMasukKeras::where('kode',$kodePembelian)->delete();
+                StockLogMasukKeras260::where('kode',$kodePembelian)->delete();
+                StockLogMasukSengon260::where('kode',$kodePembelian)->delete();
                 DetailPembelian::where('kode_pembelian',$kodePembelian)->delete();
                 DB::commit();
                 return redirect("/pembelian")->with('success','Data berhasil dihapus!');
@@ -696,10 +700,10 @@ class PembelianController extends Controller
             'kode'=>$kode,
             'tanggal'=>$request_tanggal,
             'supplier'=>$ddp->supplier,
-            'uraian'=>$sum_Vsuper+$sum_Vkeras,
-            // 'uraian'=>$sum_vol,
-            'harga'=>$sum_Hsuper+$sum_Hkeras,
-            // 'harga'=>$sum_total,
+            // 'uraian'=>$sum_Vsuper+$sum_Vkeras,
+            'uraian'=>$sum_vol,
+            // 'harga'=>$sum_Hsuper+$sum_Hkeras,
+            'harga'=>$sum_total,
             'ket'=>'beli',
         ];
         // dd($dataLog);
@@ -764,7 +768,7 @@ class PembelianController extends Controller
     }
     public function getDetailpembelian(Request $requset){
         $detailPembelian=DetailPembelian::whereIn('kode_pembelian',$requset->kode)
-            ->where('id_master_mentah','!=',[2,3])
+            // ->where('id_master_mentah','!=',[2,3])
             ->join('master_mentah','master_mentah.id','=','id_master_mentah')
             ->select('detail_pembelian.*','master_mentah.jenis_muatan as jenis_muatan')
             ->get();

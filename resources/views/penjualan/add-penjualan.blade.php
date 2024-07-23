@@ -57,13 +57,15 @@
                             <div class="mb-3 row">
                                 <label for="grade" class="col-md-2 col-form-label">Grade</label>
                                 <div class="col-md-10">
-                                    <select class="form-control select2" name="grade" id="grade" required>
-                                        <option value="" disabled selected onchange="pilih_grade()">Pilih Grade
+                                    <select class="form-control select2" name="grade" id="grade" required
+                                        onchange="pilih_grade()">
+                                        <option value="" disabled selected>Pilih Grade
                                         </option>
                                         @foreach ($mateng as $m)
                                             <option value="{{ $m->id }}">{{ $m->hasil_produksi }}</option>
                                         @endforeach
                                     </select>
+                                    <div id="stock"></div>
                                 </div>
                             </div>
                             <div class="mb-3 row">
@@ -149,6 +151,63 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
+
+        function pilih_grade() {
+            var grade = document.getElementById("grade").value;
+            // console.log(grade);
+            $.ajax({
+                type: 'POST',
+                url: "{{ route('getStock') }}",
+                data: {
+                    id: grade,
+                },
+                success: function(data) {
+                    console.log(data);
+                    for (i = 0; i < data.length; i++) {
+                        // console.log(i);
+                        no = i + 1;
+                        if (data[i].ket == 'masuk') {
+                            saldoVM = Number(data[i].volume);
+                            saldoVK = 0;
+                            saldoHM = Number(data[i].harga);
+                            saldoHK = 0;
+                        } else {
+                            saldoVM = 0;
+                            saldoVK = Number(data[i].volume);
+                            saldoHM = 0;
+                            saldoHK = Number(data[i].harga);
+                        }
+
+                        if (no == 1) {
+                            saldomutasiV = 0 + saldoVM + saldoVK;
+                            if (saldoVM > 0) {
+                                saldomutasi1V = saldomutasiV + saldoVK;
+                            } else {
+                                saldomutasi1V = saldomutasiV - saldoVM;
+                            }
+                            // harga
+                            saldomutasiH = 0 + saldoHM + saldoHK;
+                            if (saldoHM > 0) {
+                                saldomutasi1H = saldomutasiH + saldoHK;
+                            } else {
+                                saldomutasi1H = saldomutasiH - saldoHM;
+                            }
+                        } else {
+                            sals1V = saldomutasi1V;
+                            saldomutasi1V = sals1V + saldoVM - saldoVK;
+                            // harga
+                            sals1H = saldomutasi1H;
+                            saldomutasi1H = sals1H + saldoHM - saldoHK;
+                        }
+
+
+                    }
+                    str = '<h6 class="mt-2 ms-1">Stock : ' + saldomutasi1V.toFixed(4) + '</h6>';
+                    document.getElementById('stock').innerHTML = str;
+                    console.log(saldomutasi1V.toFixed(4));
+                }
+            });
+        }
 
         function hitungVol() {
             var ukuran1 = document.getElementById('ukuran1').value;

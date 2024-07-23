@@ -112,7 +112,13 @@
                                         @endif
                                     @endforeach
                                     <th>Log Masuk</th>
-                                    <td>{{ $saldomutasi1V_lm }}</td>
+                                    <td>
+                                        @if (round($saldomutasi1V_lm, 4) == -0)
+                                            {{ 0 }}
+                                        @else
+                                            {{ round($saldomutasi1V_lm, 4) }}
+                                        @endif
+                                    </td>
                                     <td>{{ 'Rp ' . number_format($saldomutasi1H_lm, 0, ',', '.') }}</td>
                                 @endif
                             </tr>
@@ -166,7 +172,13 @@
                                         @endif
                                     @endforeach
                                     <th>Log Masuk Keras</th>
-                                    <td>{{ $saldomutasi1V_lmk }}</td>
+                                    <td>
+                                        @if (round($saldomutasi1V_lmk, 4) == -0)
+                                            {{ 0 }}
+                                        @else
+                                            {{ round($saldomutasi1V_lmk, 4) }}
+                                        @endif
+                                    </td>
                                     <td>{{ 'Rp ' . number_format($saldomutasi1H_lmk, 0, ',', '.') }}</td>
                                 @endif
                             </tr>
@@ -174,7 +186,23 @@
                         <tbody>
                             <tr>
                                 <th></th>
-                                <th>{{ $saldomutasi1V_lm + $saldomutasi1V_lmk }}</th>
+                                <th>
+                                    @php
+                                        if (count($logmasuk) == 0) {
+                                            $saldomutasi1V_lm = 0;
+                                            $saldomutasi1H_lm = 0;
+                                        }
+                                        if (count($logmasukkeras) == 0) {
+                                            $saldomutasi1V_lmk = 0;
+                                            $saldomutasi1H_lmk = 0;
+                                        }
+                                    @endphp
+                                    @if (round($saldomutasi1V_lm + $saldomutasi1V_lmk, 4) == -0)
+                                        {{ 0 }}
+                                    @else
+                                        {{ round($saldomutasi1V_lm + $saldomutasi1V_lmk, 4) }}
+                                    @endif
+                                </th>
                                 <th>{{ 'Rp ' . number_format($saldomutasi1H_lm + $saldomutasi1H_lmk, 0, ',', '.') }}</th>
                             </tr>
                         </tbody>
@@ -241,7 +269,13 @@
                                         @endif
                                     @endforeach
                                     <th>Opc</th>
-                                    <td>{{ $saldomutasi1V_opc }}</td>
+                                    <td>
+                                        @if (round($saldomutasi1V_opc, 4) == -0)
+                                            {{ 0 }}
+                                        @else
+                                            {{ round($saldomutasi1V_opc, 4) }}
+                                        @endif
+                                    </td>
                                     <td>{{ 'Rp ' . number_format($saldomutasi1H_opc, 0, ',', '.') }}</td>
                                 @endif
                             </tr>
@@ -295,7 +329,13 @@
                                         @endif
                                     @endforeach
                                     <th>Ppc</th>
-                                    <td>{{ $saldomutasi1V_ppc }}</td>
+                                    <td>
+                                        @if (round($saldomutasi1V_ppc, 4) == -0)
+                                            {{ 0 }}
+                                        @else
+                                            {{ round($saldomutasi1V_ppc, 4) }}
+                                        @endif
+                                    </td>
                                     <td>{{ 'Rp ' . number_format($saldomutasi1H_ppc, 0, ',', '.') }}</td>
                                 @endif
                             </tr>
@@ -349,7 +389,14 @@
                                         @endif
                                     @endforeach
                                     <th>Mk</th>
-                                    <td>{{ $saldomutasi1V_mk }}</td>
+                                    <td>
+                                        @if (round($saldomutasi1V_mk, 4) == -0)
+                                            {{ 0 }}
+                                        @else
+                                            {{ round($saldomutasi1V_mk, 4) }}
+                                        @endif
+                                    </td>
+
                                     <td>{{ 'Rp ' . number_format($saldomutasi1H_mk, 0, ',', '.') }}</td>
                                 @endif
                             </tr>
@@ -357,7 +404,21 @@
                         <tbody>
                             <tr>
                                 <th></th>
-                                <th>{{ $saldomutasi1V_opc + $saldomutasi1V_ppc + $saldomutasi1V_mk }}</th>
+                                @php
+                                    if (count($stockopc) == 0) {
+                                        $saldomutasi1V_opc = 0;
+                                        $saldomutasi1H_opc = 0;
+                                    }
+                                    if (count($stockppc) == 0) {
+                                        $saldomutasi1V_ppc = 0;
+                                        $saldomutasi1H_ppc = 0;
+                                    }
+                                    if (count($stockmk) == 0) {
+                                        $saldomutasi1V_mk = 0;
+                                        $saldomutasi1H_mk = 0;
+                                    }
+                                @endphp
+                                <th>{{ round($saldomutasi1V_opc + $saldomutasi1V_ppc + $saldomutasi1V_mk, 4) }}</th>
                                 <th>{{ 'Rp ' . number_format($saldomutasi1H_opc + $saldomutasi1H_ppc + $saldomutasi1H_mk, 0, ',', '.') }}
                                 </th>
                             </tr>

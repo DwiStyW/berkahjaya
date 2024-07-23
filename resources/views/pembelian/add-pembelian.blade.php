@@ -35,9 +35,9 @@
         }
 
         /* table.dataTable.cell-border tbody tr:first-child th,
-                                                        table.dataTable.cell-border tbody tr:first-child td {
-                                                            border-top: none;
-                                                        } */
+                                                                table.dataTable.cell-border tbody tr:first-child td {
+                                                                    border-top: none;
+                                                                } */
     </style>
 @endsection
 @section('content')
@@ -494,10 +494,11 @@
                     id_master: id_master,
                 },
                 success: function(data) {
-                    console.log(data);
+                    // console.log(data);
                     str = '';
                     str += '<input name="indexLoop" hidden class="form-control" value="' + data.length + '">';
                     for (i = 0; i < data.length; i++) {
+                        console.log(i);
                         if (data[i].kelas_model == null) {
                             kelas_model = '';
                         } else {
