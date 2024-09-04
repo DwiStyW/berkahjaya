@@ -58,23 +58,41 @@ class PenjualanController extends Controller
         $master=HasilProduk::where('id',$request->grade)->get();
         foreach($master as $m){}
         // dd($master);
-        $dataPenjualan=[
-            'kode_penjualan'=>$kode,
-            'tanggal'=>$newDate,
-            'supplier'=>$request->supplier,
-            'alamat'=>$request->alamat,
-            'id_master'=>$request->grade,
-            'grade'=>$m->hasil_produksi,
-            'jenis_kayu'=>$request->jenis_kayu,
-            'ukuran1'=>$request->ukuran1,
-            'ukuran2'=>$request->ukuran2,
-            'ukuran3'=>$request->ukuran3,
-            'pcs'=>$request->pcs,
-            'crate'=>$request->crate,
-            'vol_m3'=>$request->vol,
-            'harga_vol_m3'=>$harga,
-            'total_harga'=>$total_harga,
-        ];
+        if($request->grade==1){
+            $dataPenjualan=[
+                'kode_penjualan'=>$kode,
+                'tanggal'=>$newDate,
+                'supplier'=>$request->supplier,
+                'alamat'=>$request->alamat,
+                'id_master'=>$request->grade,
+                'grade'=>$m->hasil_produksi,
+                'jenis_kayu'=>$request->jenis_kayu,
+                'ukuran1'=>$request->ukuran1,
+                'ukuran2'=>$request->ukuran2,
+                'ukuran3'=>$request->ukuran3,
+                'pcs'=>$request->pcs,
+                'crate'=>$request->crate,
+                'vol_m3'=>$request->vol,
+                'harga_vol_m3'=>$harga,
+                'total_harga'=>$total_harga,
+            ];
+        }else{
+            $dataPenjualan=[
+                'kode_penjualan'=>$kode,
+                'tanggal'=>$newDate,
+                'supplier'=>$request->supplier,
+                'alamat'=>$request->alamat,
+                'id_master'=>$request->grade,
+                'grade'=>$m->hasil_produksi,
+                'jenis_kayu'=>$request->jenis_kayu,
+                'ukuran1'=>$request->ukuran,
+                'crate'=>$request->crate,
+                'vol_m3'=>$request->vol,
+                'harga_vol_m3'=>$harga,
+                'total_harga'=>$total_harga,
+            ];
+        }
+
         $dataLog=[
             'kode'=>$kode,
             'tanggal'=>$newDate,
@@ -89,13 +107,14 @@ class PenjualanController extends Controller
             'supplier'=>$request->supplier,
             'volume'=>$request->vol,
             'harga'=>$total_harga,
+            'harga_master'=>$m->harga,
             'ket'=>'keluar',
         ];
         // dd($dataPenjualan);
         DB::beginTransaction();
         try{
             Penjualan::create($dataPenjualan);
-            LogOpc::create($dataLog);
+            // LogOpc::create($dataLog);
             if($m->id==1){
                 StockLogOpc::create($dataStock);
             }else if($m->id==3){
@@ -144,31 +163,64 @@ class PenjualanController extends Controller
         $harga=(int)preg_replace("/([^0-9\\,])/i", "", $request->harga);
         $total_harga=(int)preg_replace("/([^0-9\\,])/i", "", $request->total_harga);
 
-        $dataPenjualan=[
-            'supplier'=>$request->supplier,
-            'alamat'=>$request->alamat,
-            'grade'=>$request->grade,
-            'jenis_kayu'=>$request->jenis_kayu,
-            'ukuran1'=>$request->ukuran1,
-            'ukuran2'=>$request->ukuran2,
-            'ukuran3'=>$request->ukuran3,
-            'pcs'=>$request->pcs,
-            'crate'=>$request->crate,
-            'vol_m3'=>$request->vol,
-            'harga_vol_m3'=>$harga,
-            'total_harga'=>$total_harga,
-        ];
+        // dd($request->grade);
+        $master=HasilProduk::where('hasil_produksi',$request->grade)->get();
+        foreach($master as $m){}
+        if($request->grade==1){
+            $dataPenjualan=[
+                'supplier'=>$request->supplier,
+                'alamat'=>$request->alamat,
+                'id_master'=>$request->id_master,
+                'grade'=>$m->hasil_produksi,
+                'jenis_kayu'=>$request->jenis_kayu,
+                'ukuran1'=>$request->ukuran1,
+                'ukuran2'=>$request->ukuran2,
+                'ukuran3'=>$request->ukuran3,
+                'pcs'=>$request->pcs,
+                'crate'=>$request->crate,
+                'vol_m3'=>$request->vol,
+                'harga_vol_m3'=>$harga,
+                'total_harga'=>$total_harga,
+            ];
+        }else{
+            $dataPenjualan=[
+                'supplier'=>$request->supplier,
+                'alamat'=>$request->alamat,
+                'id_master'=>$request->grade,
+                'grade'=>$m->hasil_produksi,
+                'jenis_kayu'=>$request->jenis_kayu,
+                'ukuran1'=>$request->ukuran,
+                'crate'=>$request->crate,
+                'vol_m3'=>$request->vol,
+                'harga_vol_m3'=>$harga,
+                'total_harga'=>$total_harga,
+            ];
+        }
         $dataLog=[
             'supplier'=>$request->supplier,
             'uraian'=>$request->vol,
             'harga'=>$total_harga,
             'ket'=>'jual',
         ];
+        $dataStock=[
+            'supplier'=>$request->supplier,
+            'volume'=>$request->vol,
+            'harga'=>$total_harga,
+            'harga_master'=>$m->harga,
+            'ket'=>'keluar',
+        ];
 
         DB::beginTransaction();
         try{
             Penjualan::where('id',$de_id)->update($dataPenjualan);
-            LogOpc::where('kode',$kodePenjualan)->update($dataLog);
+            // LogOpc::where('kode',$kodePenjualan)->update($dataLog);
+            if($m->id==1){
+                StockLogOpc::where('kode',$kodePenjualan)->update($dataStock);
+            }else if($m->id==3){
+                StockLogPpc::where('kode',$kodePenjualan)->update($dataStock);
+            }else if($m->id==4){
+                StockLogMk::where('kode',$kodePenjualan)->update($dataStock);
+            }
             DB::commit();
             return redirect("/penjualan")->with('success','Data berhasil diubah!');
         }catch(Exception $e){
@@ -192,6 +244,9 @@ class PenjualanController extends Controller
         try{
             Penjualan::where('id',$de_id)->delete();
             LogOpc::where('kode',$kodePenjualan)->delete();
+            StockLogMk::where('kode',$kodePenjualan)->delete();
+            StockLogOpc::where('kode',$kodePenjualan)->delete();
+            StockLogPpc::where('kode',$kodePenjualan)->delete();
             DB::commit();
             return redirect("/penjualan")->with('success','Data berhasil dihapus!');
         }catch(Exception $e){
@@ -203,14 +258,35 @@ class PenjualanController extends Controller
 
     public function detail_penjualan($id){
         $de_id=Crypt::decrypt($id);//id penjualan
-        $penjualan=Penjualan::where('id',$de_id)->get();
+        $cariPenjualan=Penjualan::where('id',$de_id)->get();
+        foreach($cariPenjualan as $p){}
+        $grade=$p->id_master;
+        $tanggal=$p->tanggal;
+        $buyer=$p->supplier;
 
+        if($grade==1){
+            $penjualan=Penjualan::where('id',$de_id)->get();
+        }else{
+            $penjualan=Penjualan::where('tanggal',$tanggal)->where('supplier',$buyer)->get();
+        }
+
+        // dd($penjualan);
         return view('penjualan.detail_penjualan',compact('penjualan','id'));
     }
 
     public function printPenjualan($id){
         $de_id=Crypt::decrypt($id);//id penjualan
-        $penjualan=Penjualan::where('id',$de_id)->get();
+        $cariPenjualan=Penjualan::where('id',$de_id)->get();
+        foreach($cariPenjualan as $p){}
+        $grade=$p->id_master;
+        $tanggal=$p->tanggal;
+        $buyer=$p->supplier;
+
+        if($grade==1){
+            $penjualan=Penjualan::where('id',$de_id)->get();
+        }else{
+            $penjualan=Penjualan::where('tanggal',$tanggal)->where('supplier',$buyer)->get();
+        }
 
         return view('penjualan.print_penjualan',compact('penjualan','id'));
     }

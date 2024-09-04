@@ -15,6 +15,7 @@ class StockLogMk extends Model
         'supplier',
         'volume',
         'harga',
+        'harga_master',
         'ket',
     ];
 }

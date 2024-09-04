@@ -102,7 +102,7 @@
             </div>
         </div> <!-- end col -->
     </div> <!-- end row -->
-    @include('penjualan.delete-Penjualan')
+    @include('penjualan.delete-penjualan')
 @endsection
 @section('script')
     <script src="{{ URL::asset('/assets/libs/datatables/datatables.min.js') }}"></script>
@@ -115,7 +115,8 @@
                 columnDefs: [{
                     render: $.fn.dataTable.render.number('.', ',', 0, 'Rp '),
                     targets: [5]
-                }]
+                }],
+                pageLength: '30',
             });
         });
     </script>

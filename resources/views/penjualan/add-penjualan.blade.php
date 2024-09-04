@@ -75,26 +75,31 @@
                                         name="jenis_kayu">
                                 </div>
                             </div>
-                            <div class="mb-3 row">
-                                <label for="vol" class="col-md-2 col-form-label">Size</label>
-                                <div class="col-md-10">
-                                    <div class="input-group">
-                                        <input class="form-control" type="text" placeholder="000" id="ukuran1"
-                                            onchange="hitungVol()" required name="ukuran1">
-                                        <span class="input-group-text">*</span>
-                                        <input class="form-control" type="text" placeholder="000" id="ukuran2"
-                                            onchange="hitungVol()" required name="ukuran2">
-                                        <span class="input-group-text">*</span>
-                                        <input class="form-control" type="text" placeholder="000" id="ukuran3"
-                                            oninput="hitungVol()" required name="ukuran3">
+
+                            <div id="ukuran_pergrade"></div>
+
+                            <div id="opc">
+                                <div class="mb-3 row">
+                                    <label for="vol" class="col-md-2 col-form-label">Size</label>
+                                    <div class="col-md-10">
+                                        <div class="input-group">
+                                            <input class="form-control" type="text" placeholder="000" id="ukuran1"
+                                                onchange="hitungVol()" name="ukuran1">
+                                            <span class="input-group-text">*</span>
+                                            <input class="form-control" type="text" placeholder="000" id="ukuran2"
+                                                onchange="hitungVol()" name="ukuran2">
+                                            <span class="input-group-text">*</span>
+                                            <input class="form-control" type="text" placeholder="000" id="ukuran3"
+                                                oninput="hitungVol()" name="ukuran3">
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="mb-3 row">
-                                <label for="pcs" class="col-md-2 col-form-label">Pcs</label>
-                                <div class="col-md-10">
-                                    <input class="form-control" type="text" placeholder="000" id="pcs"
-                                        oninput="hitungVol()" name="pcs">
+                                <div class="mb-3 row">
+                                    <label for="pcs" class="col-md-2 col-form-label">Pcs</label>
+                                    <div class="col-md-10">
+                                        <input class="form-control" type="text" placeholder="000" id="pcs"
+                                            oninput="hitungVol()" name="pcs">
+                                    </div>
                                 </div>
                             </div>
                             <div class="mb-3 row">
@@ -105,11 +110,13 @@
                                         title="gunakan titik(.) untuk menggantikan koma(,)">
                                 </div>
                             </div>
-                            <div class="mb-3 row">
-                                <label for="crate" class="col-md-2 col-form-label">Crate</label>
-                                <div class="col-md-10">
-                                    <input class="form-control" type="text" placeholder="0" id="crate"
-                                        name="crate">
+                            <div id="Fcrate">
+                                <div class="mb-3 row">
+                                    <label for="crate" class="col-md-2 col-form-label">Crate</label>
+                                    <div class="col-md-10">
+                                        <input class="form-control" type="text" placeholder="0" id="crate"
+                                            name="crate">
+                                    </div>
                                 </div>
                             </div>
                             <div class="mb-3 row">
@@ -163,62 +170,98 @@
                 },
                 success: function(data) {
                     console.log(data);
-                    for (i = 0; i < data.length; i++) {
-                        // console.log(i);
-                        no = i + 1;
-                        if (data[i].ket == 'masuk') {
-                            saldoVM = Number(data[i].volume);
-                            saldoVK = 0;
-                            saldoHM = Number(data[i].harga);
-                            saldoHK = 0;
-                        } else {
-                            saldoVM = 0;
-                            saldoVK = Number(data[i].volume);
-                            saldoHM = 0;
-                            saldoHK = Number(data[i].harga);
-                        }
-
-                        if (no == 1) {
-                            saldomutasiV = 0 + saldoVM + saldoVK;
-                            if (saldoVM > 0) {
-                                saldomutasi1V = saldomutasiV + saldoVK;
+                    if (data.length > 0) {
+                        for (i = 0; i < data.length; i++) {
+                            // console.log(i);
+                            no = i + 1;
+                            if (data[i].ket == 'masuk') {
+                                saldoVM = Number(data[i].volume);
+                                saldoVK = 0;
+                                saldoHM = Number(data[i].harga);
+                                saldoHK = 0;
                             } else {
-                                saldomutasi1V = saldomutasiV - saldoVM;
+                                saldoVM = 0;
+                                saldoVK = Number(data[i].volume);
+                                saldoHM = 0;
+                                saldoHK = Number(data[i].harga);
                             }
-                            // harga
-                            saldomutasiH = 0 + saldoHM + saldoHK;
-                            if (saldoHM > 0) {
-                                saldomutasi1H = saldomutasiH + saldoHK;
+
+                            if (no == 1) {
+                                saldomutasiV = 0 + saldoVM + saldoVK;
+                                if (saldoVM > 0) {
+                                    saldomutasi1V = saldomutasiV + saldoVK;
+                                } else {
+                                    saldomutasi1V = saldomutasiV - saldoVM;
+                                }
+                                // harga
+                                saldomutasiH = 0 + saldoHM + saldoHK;
+                                if (saldoHM > 0) {
+                                    saldomutasi1H = saldomutasiH + saldoHK;
+                                } else {
+                                    saldomutasi1H = saldomutasiH - saldoHM;
+                                }
                             } else {
-                                saldomutasi1H = saldomutasiH - saldoHM;
+                                sals1V = saldomutasi1V;
+                                saldomutasi1V = sals1V + saldoVM - saldoVK;
+                                // harga
+                                sals1H = saldomutasi1H;
+                                saldomutasi1H = sals1H + saldoHM - saldoHK;
                             }
-                        } else {
-                            sals1V = saldomutasi1V;
-                            saldomutasi1V = sals1V + saldoVM - saldoVK;
-                            // harga
-                            sals1H = saldomutasi1H;
-                            saldomutasi1H = sals1H + saldoHM - saldoHK;
+
+
                         }
-
-
+                        str = '<h6 class="mt-2 ms-1">Stock : ' + saldomutasi1V.toFixed(4) + '</h6>';
+                        document.getElementById('stock').innerHTML = str;
+                        // console.log(saldomutasi1V.toFixed(4));
+                    } else {
+                        str = '<h6 class="mt-2 ms-1">Stock : ' + 0 + '</h6>';
+                        document.getElementById('stock').innerHTML = str;
                     }
-                    str = '<h6 class="mt-2 ms-1">Stock : ' + saldomutasi1V.toFixed(4) + '</h6>';
-                    document.getElementById('stock').innerHTML = str;
-                    console.log(saldomutasi1V.toFixed(4));
                 }
             });
+            if (grade == 3 || grade == 4) {
+                html = '<div class="mb-3 row">';
+                html += '    <label for="vol" class="col-md-2 col-form-label">Ukuran</label>';
+                html += '    <div class="col-md-10">';
+                html += '        <input class="form-control" type="number" placeholder="0.00" id="ukuran"';
+                html += '            oninput="hitungVol()" name="ukuran">';
+                html += '    </div>';
+                html += '</div>';
+
+                document.getElementById('ukuran_pergrade').innerHTML = html;
+                document.getElementById('ukuran_pergrade').style.display = 'block';
+                document.getElementById('opc').style.display = 'none';
+                document.getElementById('Fcrate').style.display = 'none';
+            } else {
+                document.getElementById('ukuran_pergrade').style.display = 'none';
+                document.getElementById('opc').style.display = 'block';
+                document.getElementById('Fcrate').style.display = 'block';
+            }
+            hitungVol()
         }
 
         function hitungVol() {
+            var grade = document.getElementById("grade").value;
             var ukuran1 = document.getElementById('ukuran1').value;
             var ukuran2 = document.getElementById('ukuran2').value;
             var ukuran3 = document.getElementById('ukuran3').value;
             var pcs = document.getElementById('pcs').value;
             // console.log(pcs);
-            if (ukuran1 != '' && ukuran2 != '' && ukuran3 != '' && pcs != '') {
-                var vol = ukuran1 * ukuran2 * ukuran3 * pcs / 100000000
+            if (grade == 1) {
+                if (ukuran1 != '' && ukuran2 != '' && ukuran3 != '' && pcs != '') {
+                    var vol = ukuran1 * ukuran2 * ukuran3 * pcs / 100000000
+                    document.getElementById('vol').value = vol.toFixed(4);
+                }
+            } else if (grade == 3) {
+                var ukuran = document.getElementById('ukuran').value;
+                var vol = ukuran * 122 * 122 * 80 / 100000000
+                document.getElementById('vol').value = vol.toFixed(4);
+            } else if (grade == 4) {
+                var ukuran = document.getElementById('ukuran').value;
+                var vol = ukuran * 122 * 122 * 70 / 100000000
                 document.getElementById('vol').value = vol.toFixed(4);
             }
+
         }
 
         function hitungTotal() {

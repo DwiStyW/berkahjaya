@@ -6,15 +6,17 @@ use App\Http\Controllers\HasilProdukController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\LogopcController;
 use App\Http\Controllers\MasterMentahController;
+use App\Http\Controllers\OperasionalController;
 use App\Http\Controllers\PembelianController;
 use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\ProduksiController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('home.welcome');
 });
 
 // Route::get('/dashboard', function () {
@@ -42,12 +44,30 @@ Route::middleware('auth')->group(function () {
     Route::post('/mastermentah-update/{id}', [MasterMentahController::class, 'update'])->name('mastermentah.update');
     Route::get('/mastermentah-delete/{id}', [MasterMentahController::class, 'destroy'])->name('mastermentah.delete');
 
+    // supplier
+    Route::get('/supplier', [SupplierController::class, 'index'])->name('supplier.index');
+    Route::get('/supplier-add', [SupplierController::class, 'create'])->name('supplier.add');
+    Route::post('/supplier-store', [SupplierController::class, 'store'])->name('supplier.store');
+    Route::get('/supplier-edit/{id}', [SupplierController::class, 'edit'])->name('supplier.edit');
+    Route::post('/supplier-update/{id}', [SupplierController::class, 'update'])->name('supplier.update');
+    Route::get('/supplier-delete/{id}', [SupplierController::class, 'destroy'])->name('supplier.delete');
+
+    // operasional
+    Route::get('/operasional', [OperasionalController::class, 'index'])->name('operasional.index');
+    Route::get('/operasional-add', [OperasionalController::class, 'create'])->name('operasional.add');
+    Route::post('/operasional-store', [OperasionalController::class, 'store'])->name('operasional.store');
+    Route::get('/operasional-edit/{id}', [OperasionalController::class, 'edit'])->name('operasional.edit');
+    Route::post('/operasional-update/{id}', [OperasionalController::class, 'update'])->name('operasional.update');
+    Route::get('/operasional-delete/{id}', [OperasionalController::class, 'destroy'])->name('operasional.delete');
+
     // detail master mentah
     Route::get('/detailmastermentah/{id}', [DetailMasterMentahController::class, 'index'])->name('detailmastermentah.index');
     Route::get('/detailmastermentah-add/{id}', [DetailMasterMentahController::class, 'create'])->name('detailmastermentah.add');
     Route::post('/detailmastermentah-store', [DetailMasterMentahController::class, 'store'])->name('detailmastermentah.store');
     Route::get('/detailmastermentah-edit/{id}', [DetailMasterMentahController::class, 'edit'])->name('detailmastermentah.edit');
+    Route::get('/detailmastermentah-edit-permodel/{id}/{kelas}', [DetailMasterMentahController::class, 'edit_perkelas'])->name('detailmastermentah.edit_perkode');
     Route::post('/detailmastermentah-update/{id}', [DetailMasterMentahController::class, 'update'])->name('detailmastermentah.update');
+    Route::post('/detailmastermentah-update/{id}/{kelas}', [DetailMasterMentahController::class, 'update_perkelas'])->name('detailmastermentah.update');
     Route::get('/detailmastermentah-delete/{id}', [DetailMasterMentahController::class, 'destroy'])->name('detailmastermentah.delete');
 
     // produksi
@@ -84,14 +104,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/pembelian-add', [PembelianController::class, 'create'])->name('pembelian.add');
     Route::get('/pembelian-store', [PembelianController::class, 'store'])->name('pembelian.store');
     Route::get('/pembelian-edit/{id}', [PembelianController::class, 'edit'])->name('pembelian.edit');
-    Route::get('/pembelian-update/{id}', [PembelianController::class, 'update'])->name('pembelian.update');
+    Route::get('/pembelian-edit-info/{id}', [PembelianController::class, 'edit_info'])->name('pembelian.edit');
+    Route::get('/pembelian-update/{id}/{tgl}/{sup}', [PembelianController::class, 'update'])->name('pembelian.update');
     Route::get('/pembelian-delete/{id}', [PembelianController::class, 'destroy'])->name('pembelian.delete');
     Route::get('/detailpembelian-delete/{id}', [PembelianController::class, 'detail_destroy'])->name('detailpembelian.delete');
+    Route::get('/detailpembelian-edit-delete/{id}/{kode}', [PembelianController::class, 'detail_destroy_edit'])->name('detailpembelian.delete');
+    Route::post('/getMaster', [PembelianController::class, 'getMaster'])->name('getMaster');
     Route::post('/getModel', [PembelianController::class, 'getModel'])->name('getModel');
     Route::post('/getDetailmodel', [PembelianController::class, 'getDetailmodel'])->name('getDetailmodel');
     Route::post('/detailpembelian-store', [PembelianController::class, 'detail_store'])->name('detailpembelian.store');
     Route::post('/detailpembelian-perkode-edit/{id}', [PembelianController::class, 'detail_update_store'])->name('detailpembelian.update');
     Route::post('/getDetailpembelian', [PembelianController::class, 'getDetailpembelian'])->name('getDetailpembelian');
+    Route::post('/edit-info-pembelian/{id}', [PembelianController::class, 'update_info'])->name('info.pembelian');
 
         // penjualan
     Route::get('/penjualan', [PenjualanController::class, 'index'])->name('penjualan.index');
@@ -104,6 +128,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/penjualan-delete/{id}', [PenjualanController::class, 'destroy'])->name('penjualan.delete');
 
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+    Route::post('/getLaporan', [LaporanController::class, 'cetak'])->name('laporan.cetak');
+    Route::get('/lapor-produksi/{awal}/{akhir}', [LaporanController::class, 'produksi'])->name('laporan.produksi');
+    Route::get('/lapor-flow/{awal}/{akhir}', [LaporanController::class, 'flow'])->name('laporan.flow');
+    Route::get('/lapor-pembelian/{awal}/{akhir}', [LaporanController::class, 'pembelian'])->name('laporan.pembelian');
+    Route::get('/lapor-penjualan/{awal}/{akhir}', [LaporanController::class, 'penjualan'])->name('laporan.penjualan');
 
     // profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -114,10 +143,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/stockbaku', [StockController::class, 'stock_baku'])->name('stockbaku');
     Route::get('/stockmasuk', [StockController::class, 'stock_masuk'])->name('stockmasuk');
     Route::get('/stockmasukkeras', [StockController::class, 'stock_masuk_keras'])->name('stockmasukkeras');
+    Route::get('/stocksengon260', [StockController::class, 'stock_masuk_sengon_260'])->name('stockmasuksengon260');
+    Route::get('/stockkeras260', [StockController::class, 'stock_masuk_keras_260'])->name('stockmasukkeras260');
     Route::get('/stockopc', [StockController::class, 'stock_opc'])->name('stockopc');
     Route::get('/stockppc', [StockController::class, 'stock_ppc'])->name('stockppc');
     Route::get('/stockmk', [StockController::class, 'stock_mk'])->name('stockmk');
     Route::post('/getStock', [StockController::class, 'getStock'])->name('getStock');
+
 });
 
 require __DIR__.'/auth.php';

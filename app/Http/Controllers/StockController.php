@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\StockLogMasuk;
 use App\Models\StockLogMasukKeras;
+use App\Models\StockLogMasukKeras260;
+use App\Models\StockLogMasukSengon260;
 use App\Models\StockLogMk;
 use App\Models\StockLogOpc;
 use App\Models\StockLogPpc;
@@ -13,85 +15,148 @@ class StockController extends Controller
 {
     //
     public function stock_baku(){
-        $logmasuk=StockLogMasuk::get();
-        $logmasukkeras=StockLogMasukKeras::get();
-        $stockopc=StockLogOpc::get();
-        $stockppc=StockLogPpc::get();
-        $stockmk=StockLogMk::get();
+        $logmasuk=StockLogMasuk::orderby('tanggal','asc')->orderby('ket','desc')->get();
+        $logmasukkeras=StockLogMasukKeras::orderby('tanggal','asc')->orderby('ket','desc')->get();
+        $logsengon260=StockLogMasukSengon260::orderby('tanggal','asc')->orderby('ket','desc')->get();
+        $logkeras260=StockLogMasukKeras260::orderby('tanggal','asc')->orderby('ket','desc')->get();
+        $stockopc=StockLogOpc::orderby('tanggal','asc')->orderby('ket','desc')->get();
+        $stockppc=StockLogPpc::orderby('tanggal','asc')->orderby('ket','desc')->get();
+        $stockmk=StockLogMk::orderby('tanggal','asc')->orderby('ket','desc')->get();
         // dd($logmasuk);
-        return view('stock.list-stock-baku-global',compact('logmasuk','logmasukkeras','stockopc','stockppc','stockmk'));
+        return view('stock.list-stock-baku-global',compact('logmasuk','logmasukkeras','logsengon260','logkeras260','stockopc','stockppc','stockmk'));
     }
     public function stock_masuk(){
-        $stock=StockLogMasuk::get();
-        $stockMasuk=StockLogMasuk::where('ket','masuk')->get();
-        foreach($stockMasuk as $sM){}
-        $stockKeluar=StockLogMasuk::where('ket','keluar')->get();
-        foreach($stockKeluar as $sK){}
+        // $stock=StockLogMasuk::orderby('tanggal','asc')->get();
+        $data=StockLogMasuk::orderby('tanggal','asc')->orderby('ket','desc')->get();
+        foreach($data as $d){
+            if($d->ket=='masuk' && $d->status!=null){
+                $kode=$d->status;
+                $md5 = md5( $kode );
+                $md5 = preg_replace( '/[^0-9a-fA-F]/', '', $md5 );
+                $color = substr( $md5, 0, 6 );
+                $hex = str_split( $color, 1 );
+                $rgbd = array_map( 'hexdec', $hex );
+                $rgba = array(
+                    ( $rgbd[0] * $rgbd[1] ),
+                    ( $rgbd[2] * $rgbd[3] ),
+                    ( $rgbd[4] * $rgbd[5] ),
+                );
+                $rgb_text=implode(",",$rgba);
+                $rgb='rgb('.$rgb_text.',0.4)';
+            }elseif($d->ket=='keluar'){
+                $kode=$d->kode;
+                $md5 = md5( $kode );
+                $md5 = preg_replace( '/[^0-9a-fA-F]/', '', $md5 );
+                $color = substr( $md5, 0, 6 );
+                $hex = str_split( $color, 1 );
+                $rgbd = array_map( 'hexdec', $hex );
+                $rgba = array(
+                    ( $rgbd[0] * $rgbd[1] ),
+                    ( $rgbd[2] * $rgbd[3] ),
+                    ( $rgbd[4] * $rgbd[5] ),
+                );
+                $rgb_text=implode(",",$rgba);
+                $rgb='rgb('.$rgb_text.',0.4)';
+            }
+            elseif($d->ket=='masuk' && $d->status==null){
+                $rgb='#fff';
+            }
 
-        $saldo_Vawal=0;
-        $saldo_Vakhir=$stockMasuk->sum('volume')-$stockKeluar->sum('volume');
-        $saldo_Hawal=0;
-        $saldo_Hakhir=$stockMasuk->sum('harga')-$stockKeluar->sum('harga');
-        // dd($saldo_akhir);
+
+            // dump($cari);
+            // dd($cari);
+            $stock[]=[
+                'kode'=>$d->kode,
+                'tanggal'=>$d->tanggal,
+                'supplier'=>$d->supplier,
+                'volume'=>$d->volume,
+                'harga'=>$d->harga,
+                'ket'=>$d->ket,
+                'status'=>$d->status,
+                'color'=>$rgb,
+            ];
+        }
+        // dd($stock);
         return view('stock.list-stock-masuk',compact('stock'));
     }
 
     public function stock_masuk_keras(){
-        $stock=StockLogMasukKeras::get();
-        $stockMasuk=StockLogMasuk::where('ket','masuk')->get();
-        foreach($stockMasuk as $sM){}
-        $stockKeluar=StockLogMasuk::where('ket','keluar')->get();
-        foreach($stockKeluar as $sK){}
+        $data=StockLogMasukKeras::orderby('tanggal','asc')->orderby('ket','desc')->get();
+        foreach($data as $d){
+            if($d->ket=='masuk' && $d->status!=null){
+                $kode=$d->status;
+                $md5 = md5( $kode );
+                $md5 = preg_replace( '/[^0-9a-fA-F]/', '', $md5 );
+                $color = substr( $md5, 0, 6 );
+                $hex = str_split( $color, 1 );
+                $rgbd = array_map( 'hexdec', $hex );
+                $rgba = array(
+                    ( $rgbd[0] * $rgbd[1] ),
+                    ( $rgbd[2] * $rgbd[3] ),
+                    ( $rgbd[4] * $rgbd[5] ),
+                );
+                $rgb_text=implode(",",$rgba);
+                $rgb='rgb('.$rgb_text.',0.4)';
+            }elseif($d->ket=='keluar'){
+                $kode=$d->kode;
+                $md5 = md5( $kode );
+                $md5 = preg_replace( '/[^0-9a-fA-F]/', '', $md5 );
+                $color = substr( $md5, 0, 6 );
+                $hex = str_split( $color, 1 );
+                $rgbd = array_map( 'hexdec', $hex );
+                $rgba = array(
+                    ( $rgbd[0] * $rgbd[1] ),
+                    ( $rgbd[2] * $rgbd[3] ),
+                    ( $rgbd[4] * $rgbd[5] ),
+                );
+                $rgb_text=implode(",",$rgba);
+                $rgb='rgb('.$rgb_text.',0.4)';
+            }
+            elseif($d->ket=='masuk' && $d->status==null){
+                $rgb='#fff';
+            }
 
-        $saldo_Vawal=0;
-        $saldo_Vakhir=$stockMasuk->sum('volume')-$stockKeluar->sum('volume');
-        $saldo_Hawal=0;
-        $saldo_Hakhir=$stockMasuk->sum('harga')-$stockKeluar->sum('harga');
+
+            // dump($cari);
+            // dd($cari);
+            $stock[]=[
+                'kode'=>$d->kode,
+                'tanggal'=>$d->tanggal,
+                'supplier'=>$d->supplier,
+                'volume'=>$d->volume,
+                'harga'=>$d->harga,
+                'ket'=>$d->ket,
+                'status'=>$d->status,
+                'color'=>$rgb,
+            ];
+        }
         // dd($saldo_akhir);
         return view('stock.list-stock-masuk-keras',compact('stock'));
     }
 
-    public function stock_opc(){
-        $stock=StockLogOpc::get();
-        // $stockMasuk=StockLogMasuk::where('ket','masuk')->get();
-        // foreach($stockMasuk as $sM){}
-        // $stockKeluar=StockLogMasuk::where('ket','keluar')->get();
-        // foreach($stockKeluar as $sK){}
-
-        // $saldo_Vawal=0;
-        // $saldo_Vakhir=$stockMasuk->sum('volume')-$stockKeluar->sum('volume');
-        // $saldo_Hawal=0;
-        // $saldo_Hakhir=$stockMasuk->sum('harga')-$stockKeluar->sum('harga');
+    public function stock_masuk_sengon_260(){
+        $stock=StockLogMasukSengon260::orderby('tanggal','asc')->get();
         // dd($saldo_akhir);
+        return view('stock.list-stock-sengon-260',compact('stock'));
+    }
+
+    public function stock_masuk_keras_260(){
+        $stock=StockLogMasukKeras260::orderby('tanggal','asc')->get();
+        // dd($saldo_akhir);
+        return view('stock.list-stock-keras-260',compact('stock'));
+    }
+
+    public function stock_opc(){
+        $stock=StockLogOpc::orderby('tanggal','asc')->orderby('ket','desc')->get();
         return view('stock.list-stock-jadi-opc',compact('stock'));
     }
     public function stock_ppc(){
-        $stock=StockLogPpc::get();
-        // $stockMasuk=StockLogMasuk::where('ket','masuk')->get();
-        // foreach($stockMasuk as $sM){}
-        // $stockKeluar=StockLogMasuk::where('ket','keluar')->get();
-        // foreach($stockKeluar as $sK){}
-
-        // $saldo_Vawal=0;
-        // $saldo_Vakhir=$stockMasuk->sum('volume')-$stockKeluar->sum('volume');
-        // $saldo_Hawal=0;
-        // $saldo_Hakhir=$stockMasuk->sum('harga')-$stockKeluar->sum('harga');
-        // dd($saldo_akhir);
-        return view('stock.list-stock-jadi-opc',compact('stock'));
+        $stock=StockLogPpc::orderby('tanggal','asc')->orderby('ket','desc')->get();
+        return view('stock.list-stock-jadi-ppc',compact('stock'));
     }
     public function stock_mk(){
-        $stock=StockLogMk::get();
-        // $stockMasuk=StockLogMasuk::where('ket','masuk')->get();
-        // foreach($stockMasuk as $sM){}
-        // $stockKeluar=StockLogMasuk::where('ket','keluar')->get();
-        // foreach($stockKeluar as $sK){}
-
-        // $saldo_Vawal=0;
-        // $saldo_Vakhir=$stockMasuk->sum('volume')-$stockKeluar->sum('volume');
-        // $saldo_Hawal=0;
-        // $saldo_Hakhir=$stockMasuk->sum('harga')-$stockKeluar->sum('harga');
-        // dd($saldo_akhir);
-        return view('stock.list-stock-jadi-opc',compact('stock'));
+        $stock=StockLogMk::orderby('tanggal','asc')->orderby('ket','desc')->get();
+        return view('stock.list-stock-jadi-mk',compact('stock'));
     }
 
     public function getStock(Request $request){

@@ -1,6 +1,6 @@
 @extends('layout.master')
 @section('title')
-    Hasil Produk
+    Stock
 @endsection
 @section('css')
     <!-- DataTables -->
@@ -33,7 +33,7 @@
 
         table.dataTable thead th,
         tavle.dataTable tbody td {
-            max-width: 100px;
+            max-width: 50px;
         }
     </style>
 @endsection
@@ -43,7 +43,7 @@
             Berkah Jaya
         @endslot
         @slot('title')
-            Hasil Produk
+            Stock
         @endslot
     @endcomponent
 
@@ -51,24 +51,32 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <table id="datatable" class="dataTable cell-border dt-responsive nowrap"
+                    <table id="datatable" class="dataTable cell-border nowrap"
                         style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead class="bg-secondary text-white">
                             <tr>
                                 <th rowspan="2">No</th>
                                 <th rowspan="2">Tanggal</th>
                                 <th rowspan="2">Supplier</th>
-                                <th colspan="2">Masuk</th>
-                                <th colspan="2">Keluar</th>
-                                <th rowspan="2">Total Volume</th>
-                                <th rowspan="2">Total Rupiah</th>
+                                @if (Auth::user()->role == '1')
+                                    <th colspan="2">Masuk</th>
+                                    <th colspan="2">Keluar</th>
+                                    <th rowspan="2">Total Volume</th>
+                                    <th rowspan="2">Total Rupiah</th>
+                                @else
+                                    <th>Masuk</th>
+                                    <th>Keluar</th>
+                                    <th rowspan="2">Total Volume</th>
+                                @endif
                             </tr>
-                            <tr>
-                                <th>Volume</th>
-                                <th>Rupiah</th>
-                                <th>Volume</th>
-                                <th>Rupiah</th>
-                            </tr>
+                            @if (Auth::user()->role == '1')
+                                <tr>
+                                    <th>Volume</th>
+                                    <th>Rupiah</th>
+                                    <th>Volume</th>
+                                    <th>Rupiah</th>
+                                </tr>
+                            @endif
                         </thead>
                         <tbody>
                             @php
@@ -86,7 +94,7 @@
                                             $saldoVM = 0;
                                             $saldoVK = $item->volume;
                                             $saldoHM = 0;
-                                            $saldoHK = $item->harga;
+                                            $saldoHK = $item->volume * $item->harga_master;
                                         }
                                     @endphp
                                     @if ($no == 1)
@@ -94,30 +102,44 @@
                                             <td>{{ $no++ }}</td>
                                             <td>{{ $item->tanggal }}</td>
                                             <td>{{ $item->supplier }}</td>
-                                            @if ($item->ket == 'masuk')
-                                                <td>{{ $item->volume }}</td>
-                                                <td>{{ 'Rp ' . number_format($item->harga, 0, ',', '.') }}</td>
+                                            @if (Auth::user()->role == '1')
+                                                @if ($item->ket == 'masuk')
+                                                    <td>{{ $item->volume }}</td>
+                                                    <td>{{ 'Rp ' . number_format($item->harga, 0, ',', '.') }}</td>
+                                                @else
+                                                    <td></td>
+                                                    <td></td>
+                                                @endif
+                                                @if ($item->ket == 'keluar')
+                                                    <td>{{ $item->volume }}</td>
+                                                    <td>{{ 'Rp ' . number_format($item->volume * $item->harga_master, 0, ',', '.') }}
+                                                    </td>
+                                                @else
+                                                    <td></td>
+                                                    <td></td>
+                                                @endif
                                             @else
-                                                <td></td>
-                                                <td></td>
-                                            @endif
-                                            @if ($item->ket == 'keluar')
-                                                <td>{{ $item->volume }}</td>
-                                                <td>{{ 'Rp ' . number_format($item->harga, 0, ',', '.') }}</td>
-                                            @else
-                                                <td></td>
-                                                <td></td>
+                                                @if ($item->ket == 'masuk')
+                                                    <td>{{ $item->volume }}</td>
+                                                @else
+                                                    <td></td>
+                                                @endif
+                                                @if ($item->ket == 'keluar')
+                                                    <td>{{ $item->volume }}</td>
+                                                @else
+                                                    <td></td>
+                                                @endif
                                             @endif
                                             @php
                                                 // volume
-                                                $saldomutasiV = 0 + $saldoVM + $saldoVK;
+                                                $saldomutasiV = 0 + $saldoVM - $saldoVK;
                                                 if ($saldoVM > 0) {
                                                     $saldomutasi1V = $saldomutasiV + $saldoVK;
                                                 } else {
                                                     $saldomutasi1V = $saldomutasiV - $saldoVM;
                                                 }
                                                 // harga
-                                                $saldomutasiH = 0 + $saldoHM + $saldoHK;
+                                                $saldomutasiH = 0 + $saldoHM - $saldoHK;
                                                 if ($saldoHM > 0) {
                                                     $saldomutasi1H = $saldomutasiH + $saldoHK;
                                                 } else {
@@ -127,26 +149,42 @@
                                             <td>
                                                 {{ $saldomutasi1V }}
                                             </td>
-                                            <td>{{ 'Rp ' . number_format($saldomutasi1H, 0, ',', '.') }}</td>
+                                            @if (Auth::user()->role == '1')
+                                                <td>{{ 'Rp ' . number_format($saldomutasi1H, 0, ',', '.') }}</td>
+                                            @endif
                                         </tr>
                                     @else
                                         <tr>
                                             <td>{{ $no++ }}</td>
                                             <td>{{ $item->tanggal }}</td>
                                             <td>{{ $item->supplier }}</td>
-                                            @if ($item->ket == 'masuk')
-                                                <td>{{ $item->volume }}</td>
-                                                <td>{{ 'Rp ' . number_format($item->harga, 0, ',', '.') }}</td>
+                                            @if (Auth::user()->role == '1')
+                                                @if ($item->ket == 'masuk')
+                                                    <td>{{ $item->volume }}</td>
+                                                    <td>{{ 'Rp ' . number_format($item->harga, 0, ',', '.') }}</td>
+                                                @else
+                                                    <td></td>
+                                                    <td></td>
+                                                @endif
+                                                @if ($item->ket == 'keluar')
+                                                    <td>{{ $item->volume }}</td>
+                                                    <td>{{ 'Rp ' . number_format($item->volume * $item->harga_master, 0, ',', '.') }}
+                                                    </td>
+                                                @else
+                                                    <td></td>
+                                                    <td></td>
+                                                @endif
                                             @else
-                                                <td></td>
-                                                <td></td>
-                                            @endif
-                                            @if ($item->ket == 'keluar')
-                                                <td>{{ $item->volume }}</td>
-                                                <td>{{ 'Rp ' . number_format($item->harga, 0, ',', '.') }}</td>
-                                            @else
-                                                <td></td>
-                                                <td></td>
+                                                @if ($item->ket == 'masuk')
+                                                    <td>{{ $item->volume }}</td>
+                                                @else
+                                                    <td></td>
+                                                @endif
+                                                @if ($item->ket == 'keluar')
+                                                    <td>{{ $item->volume }}</td>
+                                                @else
+                                                    <td></td>
+                                                @endif
                                             @endif
                                             @php
                                                 // volume
@@ -159,18 +197,24 @@
                                             <td>
                                                 {{ round($saldomutasi1V, 4) }}
                                             </td>
-                                            <td>
-                                                {{ 'Rp ' . number_format($saldomutasi1H, 0, ',', '.') }}
-                                            </td>
+                                            @if (Auth::user()->role == '1')
+                                                <td>{{ 'Rp ' . number_format($saldomutasi1H, 0, ',', '.') }}</td>
+                                            @endif
                                         </tr>
                                     @endif
                                 @endforeach
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="7">Saldo Akhir</td>
+                                @if (Auth::user()->role == '1')
+                                    <td colspan="7">Saldo Akhir</td>
+                                @else
+                                    <td colspan="5">Saldo Akhir</td>
+                                @endif
                                 <td>{{ round($saldomutasi1V, 4) }}</td>
-                                <td>{{ 'Rp ' . number_format($saldomutasi1H, 0, ',', '.') }}</td>
+                                @if (Auth::user()->role == '1')
+                                    <td>{{ 'Rp ' . number_format($saldomutasi1H, 0, ',', '.') }}</td>
+                                @endif
                             </tr>
                         </tfoot>
                         @endif

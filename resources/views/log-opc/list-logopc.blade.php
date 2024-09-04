@@ -44,13 +44,13 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    @if (Auth::user()->role == '1')
+                    {{-- @if (Auth::user()->role == '1')
                         <div class="d-flex mb-3">
                             <a href="/logopc-add" class="p-2 btn-sm btn-success">
                                 <i class="uil uil-file-plus font-size-18 me-1"></i>Tambah Log Opc
                             </a>
                         </div>
-                    @endif
+                    @endif --}}
                     <table id="datatable" class="dataTable cell-border" style="width: 100%;">
                         <thead class="bg-secondary text-white">
                             <tr>
@@ -143,7 +143,8 @@
                     columnDefs: [{
                         render: $.fn.dataTable.render.number('.', ',', 0, 'Rp '),
                         targets: [5, 6]
-                    }]
+                    }],
+                    paging: false
                 @endif
             });
         });

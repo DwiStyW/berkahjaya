@@ -1,6 +1,6 @@
 @extends('layout.master')
 @section('title')
-    Hasil Produk
+    Detail Master Mentah
 @endsection
 @section('css')
     <!-- DataTables -->
@@ -41,7 +41,7 @@
             Berkah Jaya
         @endslot
         @slot('title')
-            Hasil Produk
+            Detail Master Mentah
         @endslot
     @endcomponent
 
@@ -61,10 +61,13 @@
                         <thead class="bg-secondary text-white">
                             <tr>
                                 <th style="width:10px">No</th>
-                                <th colspan="2">Model</th>
+                                <th>Model</th>
+                                <th></th>
                                 <th>Pakem</th>
-                                <th>Harga</th>
+                                <th>Harga Baru</th>
+                                <th>Harga Lama</th>
                                 <th>Aksi</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -76,8 +79,9 @@
                                     <td>{{ $no++ }}</td>
                                     <td>{{ $item->kelas_model }}</td>
                                     <td>{{ $item->model }}</td>
-                                    <td>{{ $item->pakem_pembulatan }}</td>
+                                    <td>{{ round($item->pakem_pembulatan, 3) }}</td>
                                     <td>{{ $item->harga }}</td>
+                                    <td>{{ $item->harga_khusus }}</td>
                                     <td>
                                         <ul class="list-inline mb-0">
                                             <li class="list-inline-item">
@@ -89,6 +93,22 @@
                                                     data-bs-target="#hapusmodal" class="px-2 text-danger">
                                                     <i class="uil uil-trash-alt font-size-18"></i>
                                                 </a>
+                                            </li>
+                                        </ul>
+                                    </td>
+                                    <td>
+                                        <ul class="list-inline mb-0">
+                                            <li class="list-inline-item">
+                                                @php
+                                                    if ($item->kelas_model == null) {
+                                                        $kelas_model = 'null';
+                                                    } else {
+                                                        $kelas_model = $item->kelas_model;
+                                                    }
+                                                @endphp
+                                                <a href="/detailmastermentah-edit-permodel/{{ $item->id_master_mentah }}/{{ $kelas_model }}"
+                                                    class="px-2 btn btn-sm btn-warning ">Edit Permodel <i
+                                                        class="uil uil-pen font-size-18"></i></a>
                                             </li>
                                         </ul>
                                     </td>
@@ -112,16 +132,13 @@
     <script src="{{ URL::asset('/assets/libs/jszip/jszip.min.js') }}"></script>
     <script src="{{ URL::asset('/assets/libs/pdfmake/pdfmake.min.js') }}"></script>
     {{-- <script src="{{ URL::asset('/assets/js/pages/datatables.init.js') }}"></script> --}}
+    <script src="https://cdn.jsdelivr.net/gh/ashl1/datatables-rowsgroup@v2.0.0/dataTables.rowsGroup.js"></script>
     <script>
         $(document).ready(function() {
             var table = $('#datatable').DataTable({
-                dom: '<"table-responsive w-100"<t>>',
-                // columnDefs: [{
-                //     render: function(data, type, row) {
-                //         return (100 * data).toFixed(2) + "%";
-                //     },
-                //     targets: [3]
-                // }]
+                dom: 'fr<"table-responsive w-100"<t>>',
+                rowsGroup: [7],
+                paging: false
             });
         });
     </script>

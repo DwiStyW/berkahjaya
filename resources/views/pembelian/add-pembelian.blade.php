@@ -35,9 +35,9 @@
         }
 
         /* table.dataTable.cell-border tbody tr:first-child th,
-                                                                table.dataTable.cell-border tbody tr:first-child td {
-                                                                    border-top: none;
-                                                                } */
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    table.dataTable.cell-border tbody tr:first-child td {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        border-top: none;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    } */
     </style>
 @endsection
 @section('content')
@@ -80,6 +80,28 @@
                                         id="supplier_field" name="supplier_field" disabled>
                                     <input class="form-control" type="text" placeholder="nama supplier" id="supplier"
                                         name="supplier" oninput="setSupplier()">
+                                </div>
+                            </div>
+                            <div class="mb-3 row">
+                                <label for="no_truk" class="col-md-2 col-form-label">No Truk</label>
+                                <div class="col-md-10">
+                                    <input class="form-control" placeholder="X 0000 XX" id="no_truk" name="no_truk"
+                                        oninput="setTruk()">
+                                </div>
+                            </div>
+                            <div class="mb-3 row">
+                                <label for="tipeHarga" class="col-md-2 col-form-label">Tipe Harga</label>
+                                <div class="d-flex col-md-10">
+                                    <div class="col-form-label">
+                                        <input type="checkbox" class=" form-check-input" type="hidden" id="harga_baru"
+                                            checked name="harga_baru" onclick="Hargabaru()">
+                                        <span>Harga Baru</span>
+                                    </div>
+                                    <div class="ms-3 col-form-label">
+                                        <input type="checkbox" class=" form-check-input" type="hidden" id="harga_lama"
+                                            name="harga_lama" onclick="Hargalama()">
+                                        <span>Harga Lama</span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="mb-3 row">
@@ -486,6 +508,11 @@
             document.getElementById('tampil_model').style.display = 'block';
             // console.log(id_master);
             $('#id_model').empty().trigger("change");
+            if (document.getElementById('harga_lama').checked == true) {
+                tipeHarga = 'lama';
+            } else if (document.getElementById('harga_baru').checked == true) {
+                tipeHarga = 'baru';
+            }
 
             $.ajax({
                 type: 'POST',
@@ -498,13 +525,19 @@
                     str = '';
                     str += '<input name="indexLoop" hidden class="form-control" value="' + data.length + '">';
                     for (i = 0; i < data.length; i++) {
-                        console.log(i);
+                        // console.log(i);
                         if (data[i].kelas_model == null) {
                             kelas_model = '';
                         } else {
                             kelas_model = data[i].kelas_model;
                         }
 
+                        // tipeharga
+                        if (tipeHarga == 'lama') {
+                            harga = data[i].harga_khusus;
+                        } else if (tipeHarga == 'baru') {
+                            harga = data[i].harga;
+                        }
                         // pakem
                         pakem = Number(data[i].pakem)
                         roundedString = pakem.toFixed(3);
@@ -514,7 +547,7 @@
                         var rupiah = new Intl.NumberFormat("id-ID", {
                             style: "currency",
                             currency: "IDR"
-                        }).format(data[i].harga);
+                        }).format(harga);
                         str += '<div class="col-12 d-flex">';
                         str += '<div class="col-2 d-flex border">';
                         str += '<div class="col-6">';
@@ -531,7 +564,7 @@
                         str += '<div class="col-1 pt-2 border border-light bg-soft-light">';
                         str +=
                             '<input type="checkbox" class=" form-check-input" name="afkir' + i + '" id="afkir' +
-                            i + '" onclick="cekAfkir(' + i + ',' + data[i].harga + ')">';
+                            i + '" onclick="cekAfkir(' + i + ',' + harga + ')">';
                         str += '</div>';
                         str += '<div class="col-1 border">';
                         str += '<input class="form-control" disabled value="' + rounded + '">';
@@ -541,7 +574,7 @@
                         str += '</div>';
                         str += '<div class="col-2 ">';
                         str += '<input id="jumlah' + i + '" name="jumlah' + i +
-                            '" class="form-control" type="number" oninput="hitung(' + i + ')">';
+                            '" class="form-control formJumlah" type="text" oninput="hitung(' + i + ')">';
                         str += '</div>';
                         str += '<div class="col-2 border">';
                         str += '<input id="volume' + i + '" name="volume' + i + '" class="form-control">';
@@ -550,7 +583,7 @@
                         str += '<input id="harga_rupiah' + i + '" class="form-control" disabled value="' +
                             rupiah + '">';
                         str += '<input id="harga' + i + '" name="harga' + i +
-                            '" hidden class="form-control" value="' + data[i].harga + '">';
+                            '" hidden class="form-control" value="' + harga + '">';
                         str += '</div>';
                         str += '<div class="col-2 border">';
                         str += '<input id="rupiah' + i + '" name="rupiah' + i + '" class="form-control">';
@@ -558,8 +591,42 @@
                         str += '</div>';
                     }
                     document.getElementById('model_field').innerHTML = str;
+                    var formJumlah = document.querySelectorAll('.formJumlah')
+                    // console.log(allField);
+
+                    for (var i = 0; i < formJumlah.length; i++) {
+                        formJumlah[i].addEventListener("keyup", function(event) {
+
+                            if (event.keyCode === 40) {
+                                console.log("clicked")
+                                // event.preventDefault();
+                                if (this.parentElement.parentElement.nextElementSibling.querySelector(
+                                        '.formJumlah')) {
+                                    this.parentElement.parentElement.nextElementSibling.querySelector(
+                                        '.formJumlah').focus();
+                                }
+                            }
+
+                            if (event.keyCode === 38) {
+                                console.log("clicked")
+                                // event.preventDefault();
+                                if (this.parentElement.parentElement.previousElementSibling
+                                    .querySelector(
+                                        '.formJumlah')) {
+                                    this.parentElement.parentElement.previousElementSibling
+                                        .querySelector(
+                                            '.formJumlah').focus();
+                                }
+                            }
+
+                        })
+                    }
+                },
+                error: function(e) {
+                    console.log(e);
                 }
             });
+
         }
 
         function rp(n) {
@@ -574,7 +641,8 @@
             var pakem = document.getElementById('pakem' + n).value;
             var jumlah = document.getElementById('jumlah' + n).value;
             var harga = document.getElementById('harga' + n).value;
-
+            var index = n + 1;
+            // console.log(n);
             var volume = jumlah * pakem;
             // var total = volume * harga;
             if (document.getElementById('afkir' + n).checked == true) {
@@ -590,7 +658,7 @@
                 style: "currency",
                 currency: "IDR"
             }).format(totalHarga);
-            console.log(jumlah);
+            // console.log(jumlah);
             if (jumlah == '') {
                 document.getElementById('volume' + n).value = '';
                 document.getElementById('rupiah' + n).value = '';
@@ -601,6 +669,16 @@
 
         }
 
+        function Hargabaru() {
+            $('#harga_lama').prop('checked', false).removeAttr('checked');
+            pilihMaster()
+        }
+
+        function Hargalama() {
+            $('#harga_baru').prop('checked', false).removeAttr('checked');
+            pilihMaster()
+        }
+
 
         function setTanggal() {
             localStorage.setItem("tanggal", document.getElementById('tanggal').value);
@@ -608,6 +686,10 @@
 
         function setSupplier() {
             localStorage.setItem("supplier", document.getElementById('supplier').value);
+        }
+
+        function setTruk() {
+            localStorage.setItem("no_truk", document.getElementById('no_truk').value);
         }
 
         if (@json($detail_pembelian).length > 0) {
@@ -626,6 +708,9 @@
                 document.getElementById('supplier').setAttribute("type", "hidden");
                 document.getElementById('supplier_field').setAttribute("type", "text");
             }
+            if (localStorage.getItem("no_truk") != '') {
+                document.getElementById('no_truk').value = localStorage.getItem("no_truk");
+            }
             document.getElementById('simpan_produksi').classList.remove('disabled');
         } else if (@json($detail_pembelian).length == 0) {
             resetVal()
@@ -640,6 +725,7 @@
         function resetVal() {
             localStorage.removeItem("tanggal");
             localStorage.removeItem("supplier");
+            localStorage.removeItem("no_truk");
         }
 
         function cekAfkir(n, harga) {

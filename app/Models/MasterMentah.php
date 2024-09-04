@@ -11,6 +11,7 @@ class MasterMentah extends Model
     protected $table="master_mentah";
     protected $fillable=[
         'jenis_muatan',
+        'jenis_kayu',
         'rumus_a',
         'rumus_b',
         'rumus_c',

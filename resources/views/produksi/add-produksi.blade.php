@@ -51,14 +51,58 @@
                                 <select class="form-control select2 select2-multiple" multiple="multiple"
                                     id="supplier_field" data-placeholder="Pilih Supplier" onchange="find_log()">
                                     @foreach ($supplier as $sup)
-                                        <option value="{{ $sup->id }}">{{ $sup->supplier }} {{ $sup->uraian }}
+                                        <option value="{{ $sup['id'] }}">id={{ $sup['id'] }} {{ $sup['supplier'] }}
+                                            {{ $sup['uraian'] }}
+                                            @if ($sup['status'] == null || $sup['status'] == 'proses')
+                                                @if ($sup['sengon'] != 0 && $sup['stat_sengon'] != 'L')
+                                                    &emsp; Sengon->{{ $sup['sengon'] }}
+                                                @endif
+                                                @if ($sup['keras'] != 0 && $sup['stat_keras'] != 'L')
+                                                    &emsp; keras->{{ $sup['keras'] }}
+                                                @endif
+                                                {{-- @elseif (count($temporary) != 0)
+                                                @foreach ($temporary as $t)
+                                                @endforeach
+                                                @if ($sup['status'] == 'proses2')
+                                                    &emsp; {{ $t->jenis_kayu }}->{{ $t->log_opc }}
+                                                @endif --}}
+                                            @else
+                                                @if ($sup['sengon'] != 0 && $sup['stat_sengon'] != 'L')
+                                                    &emsp; Sengon->{{ $sup['sengon'] }}
+                                                @endif
+                                                @if ($sup['keras'] != 0 && $sup['stat_keras'] != 'L')
+                                                    &emsp; keras->{{ $sup['keras'] }}
+                                                @endif
+                                            @endif
                                         </option>
                                     @endforeach
                                 </select>
                                 <select class="form-control select2 select2-multiple" multiple="multiple" name="supplier[]"
                                     id="supplier" data-placeholder="Pilih Supplier" onchange="find_log()">
                                     @foreach ($supplier as $sup)
-                                        <option value="{{ $sup->id }}">{{ $sup->supplier }} {{ $sup->uraian }}
+                                        <option value="{{ $sup['id'] }}">id={{ $sup['id'] }} {{ $sup['supplier'] }}
+                                            {{ $sup['uraian'] }}
+                                            @if ($sup['status'] == null || $sup['status'] == 'proses')
+                                                @if ($sup['sengon'] != 0 && $sup['stat_sengon'] != 'L')
+                                                    &emsp; Sengon->{{ $sup['sengon'] }}
+                                                @endif
+                                                @if ($sup['keras'] != 0 && $sup['stat_keras'] != 'L')
+                                                    &emsp; keras->{{ $sup['keras'] }}
+                                                @endif
+                                                {{-- @elseif (count($temporary) != 0)
+                                                @foreach ($temporary as $t)
+                                                @endforeach
+                                                @if ($sup['status'] == 'proses2')
+                                                    &emsp; {{ $t->jenis_kayu }}->{{ $t->log_opc }}
+                                                @endif --}}
+                                            @else
+                                                @if ($sup['sengon'] != 0 && $sup['stat_sengon'] != 'L')
+                                                    &emsp; Sengon->{{ $sup['sengon'] }}
+                                                @endif
+                                                @if ($sup['keras'] != 0 && $sup['stat_keras'] != 'L')
+                                                    &emsp; keras->{{ $sup['keras'] }}
+                                                @endif
+                                            @endif
                                         </option>
                                     @endforeach
                                 </select>
@@ -154,10 +198,6 @@
                                     @endif
                                     <td>
                                         <ul class="list-inline mb-0">
-                                            {{-- <li class="list-inline-item">
-                                                <a href="hasilproduk-edit/{{ Crypt::encrypt($item->id) }}"
-                                                    class="px-2 text-primary"><i class="uil uil-pen font-size-18"></i></a>
-                                            </li> --}}
                                             <li class="list-inline-item">
                                                 <a onclick="hapus('{{ Crypt::encrypt($item->id) }}')"
                                                     data-bs-toggle="modal" data-bs-target="#hapusmodal"
@@ -201,7 +241,7 @@
         function ukuranproduk() {
             var produk = document.getElementById('produk').value;
             var filt_produk = data_produk.filter(a => a.id == produk)
-            console.log(filt_produk);
+            // console.log(filt_produk);
 
 
             if (filt_produk[0].satuan == 'm') {
@@ -250,6 +290,16 @@
         }
 
         var log_opc = @json($supplier);
+        var temp = @json($temporary);
+        // console.log(log_opc);
+
+        const isUniqueArr = arr => {
+            const tmp = new Set(arr);
+            if (tmp.size > 1) {
+                return false;
+            }
+            return arr[0];
+        }
 
         function find_log() {
             var select = document.getElementById('supplier');
@@ -257,73 +307,211 @@
                 .map(option => option.value);
 
             localStorage.setItem("supplier", selected);
-
+            // console.log(selected);
             let logfind = [];
+            let hargafind = [];
+            let statusfind = [];
             let kodeMasuk = [];
             for (i = 0; i < selected.length; i++) {
                 var log = log_opc.find(x => x.id == selected[i]);
-                logfind.push(Number(log.uraian));
+                console.log(log);
+                // statusfind.push(log.status);
+                if (log.status == null || log.status == 'proses1') {
+                    if (log.stat_keras == null && log.stat_sengon == null) {
+                        logfind.push(Number(log.uraian));
+                        hargafind.push(Number(log.harga));
+                    } else if ((log.stat_keras == 'L' && log.stat_sengon == null) || (log.stat_keras == 'P' && log
+                            .stat_sengon == null)) {
+                        logfind.push(Number(log.keras));
+                        hargafind.push(Number(log.harga_keras));
+                    } else if ((log.stat_sengon == 'L' && log.stat_keras == null) || (log.stat_sengon == 'P' && log
+                            .stat_keras == null)) {
+                        logfind.push(Number(log.sengon));
+                        hargafind.push(Number(log.harga_sengon));
+                    } else {
+                        logfind.push(Number(log.uraian));
+                        hargafind.push(Number(log.harga));
+                    }
+                } else if (temp.length != 0) {
+                    if (log.status == 'proses2') {
+                        logfind = [Number(temp[0].log_opc)];
+                        hargafind = [Number(temp[0].harga_log)];
+                    }
+
+                } else {
+                    if (log.stat_keras == 'L' && log.stat_sengon == null) {
+                        logfind.push(Number(log.sengon));
+                        hargafind.push(Number(log.harga_sengon));
+                    } else if (log.stat_sengon == 'L' && log.stat_keras == null) {
+                        logfind.push(Number(log.keras));
+                        hargafind.push(Number(log.harga_keras));
+                    } else {
+                        logfind.push(Number(log.uraian));
+                        hargafind.push(Number(log.harga));
+                    }
+                }
+
+                if (temp.length != 0) {
+                    // if (log.status == 'proses2') {
+                    logfind = [Number(temp[0].log_opc)];
+                    hargafind = [Number(temp[0].harga_log)];
+                    // }
+
+                }
                 kodeMasuk.push(log.kode);
             }
-            // console.log(logfind);
+            console.log(temp);
+            let sum_harga = 0;
             let sum = 0;
             logfind.forEach((el) => sum += el);
-            // console.log(sum);
+            hargafind.forEach((el) => sum_harga += el);
+            console.log(sum_harga);
             if (sum > 0) {
                 str = '<div class=" mt-3 col-12">';
                 str += '<span class="input-group-text">' + sum.toFixed(4) + '</span>';
+                str += '<input hidden id="log_kubik" name="log_kubik" value="' + sum.toFixed(4) + '">';
+                str += '<input hidden id="log_harga" name="log_harga" value="' + sum_harga + '">';
                 str += '</div>';
             } else {
                 str = '';
             }
 
             document.getElementById('logm3').innerHTML = str;
-            console.log(kodeMasuk);
-
-            // grupby
-            const groupBy = (keys) => (array) =>
-                array.reduce((objectsByKeyValue, obj) => {
-                    const value = keys.map((key) => obj[key]).join("-");
-                    objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj);
-                    return objectsByKeyValue;
-                }, {});
-            const gnoform = groupBy(['id_master_mentah']);
 
             $.ajax({
                 type: 'POST',
                 url: "{{ route('getDetailpembelian') }}",
                 data: {
                     kode: kodeMasuk,
+                    status: log.status,
                 },
                 success: function(data) {
-                    datasem = [];
+                    console.log(data);
+                    // console.log(log.status);
+                    if (log.status == 'null') {
+                        let html = '<div class=" mt-3 form-control">';
+                        for (n = 0; n < data.length; n++) {
+                            html += '<div class="d-flex">';
+                            if (data[n].vol != 0) {
+                                html += '   <div class="col-6">';
+                                html += '       <h6>' + data[n].jenis_kayu + '</h6>';
+                                html += '   </div>';
+                                html += '   <div class="col-6">';
+                                html += '   <div class="col-12 d-flex">';
+                                html += '       <h6>' + data[n].vol.toFixed(4) + '</h6>';
+                                html += '   <input name="check' + data[n].jenis_kayu + '" id="check' + data[n]
+                                    .jenis_kayu +
+                                    '" type="checkbox" class="ms-1 form-check-input" checked onclick="cekJenisKayu()">';
+                                html += '   </div>';
+                                html += '   </div>';
+                            }
+                            html += '</div>';
 
-                    for (let [id_master_mentah, detail] of Object.entries(gnoform(data))) {
-                        // console.log(detail);
-                        sumvol = 0;
-                        detail.forEach((el) => sumvol += Number(el.vol));
-                        datasem.push({
-                            id_master: id_master_mentah,
-                            jenis: detail[0].jenis_muatan,
-                            sum: sumvol.toFixed(4)
-                        })
+                        }
+                        html += '</div>';
+                        document.getElementById('detailm3').innerHTML = html;
+
+                    } else if (log.status == 'proses1') {
+                        let html = '<div class="mt-3 form-control bg-light">';
+                        // console.log(data);
+                        for (n = 0; n < data.length; n++) {
+                            html += '<div class="d-flex">';
+                            if (data[n].vol != 0) {
+
+                                if (log.stat_keras == 'P' && data[n].jenis_kayu == 'Keras') {
+                                    html += '   <div class="col-6">';
+                                    html += '       <h6>' + data[n].jenis_kayu + '</h6>';
+                                    html += '   </div>';
+                                    html += '   <div class="col-6">';
+                                    html += '   <div class="col-12 d-flex">';
+                                    html += '       <h6>' + data[n].vol.toFixed(4) + '</h6>';
+                                    html += '   <input name="check' + data[n].jenis_kayu + '" id="check' + data[
+                                            n]
+                                        .jenis_kayu +
+                                        '" type="checkbox" class="ms-1 form-check-input" checked onclick="cekJenisKayu()">';
+                                    html += '   </div>';
+                                    html += '   </div>';
+
+                                } else if (log.stat_sengon == 'P' && data[n].jenis_kayu == 'Sengon') {
+                                    html += '   <div class="col-6">';
+                                    html += '       <h6>' + data[n].jenis_kayu + '</h6>';
+                                    html += '   </div>';
+                                    html += '   <div class="col-6">';
+                                    html += '   <div class="col-12 d-flex">';
+                                    html += '       <h6>' + data[n].vol.toFixed(4) + '</h6>';
+                                    html += '   <input name="check' + data[n].jenis_kayu + '" id="check' + data[
+                                            n]
+                                        .jenis_kayu +
+                                        '" type="checkbox" class="ms-1 form-check-input" checked onclick="cekJenisKayu()">';
+                                    html += '   </div>';
+                                    html += '   </div>';
+
+                                } else {
+                                    html += '   <input name="check' + data[n].jenis_kayu +
+                                        '" id="check' + data[
+                                            n]
+                                        .jenis_kayu +
+                                        '" type="checkbox" hidden class="ms-1 form-check-input" onclick="cekJenisKayu()">';
+                                }
+
+
+                            }
+                            html += '</div>';
+
+                        }
+                        html += '</div>';
+                        document.getElementById('detailm3').innerHTML = html;
+                    } else if (temp.length != 0) {
+                        const jenisKayu = temp[0].jenis_kayu;
+                        const modStr = jenisKayu[0].toUpperCase() + jenisKayu.slice(1);
+                        const logm3 = Number(temp[0].log_opc);
+
+
+                        if (log.status == 'proses2') {
+                            let html = '<div class=" mt-3 form-control bg-light">';
+                            html += '<div class="d-flex">';
+                            html += '   <div class="col-6">';
+                            html += '       <h6>' + modStr + '</h6>';
+                            html += '   </div>';
+                            html += '   <div class="col-6">';
+                            html += '   <div class="col-12 d-flex">';
+                            html += '       <h6>' + logm3.toFixed(4) + '</h6>';
+                            html += '   <input name="check' + modStr + '" id="check' + modStr +
+                                '" type="checkbox" class="ms-1 form-check-input" checked onclick="cekJenisKayu()">';
+                            html += '   </div>';
+                            html += '   </div>';
+                            html += '</div>';
+                            document.getElementById('detailm3').innerHTML = html;
+                        }
+                    } else {
+                        let html = '<div class=" mt-3 form-control bg-light">';
+                        for (n = 0; n < data.length; n++) {
+                            // console.log(log);
+                            html += '<div class="d-flex">';
+                            if (data[n].vol != 0) {
+
+
+                                html += '   <div class="col-6">';
+                                html += '       <h6>' + data[n].jenis_kayu + '</h6>';
+                                html += '   </div>';
+                                html += '   <div class="col-6">';
+                                html += '   <div class="col-12 d-flex">';
+                                html += '       <h6>' + data[n].vol.toFixed(4) + '</h6>';
+                                html += '   <input name="check' + data[n].jenis_kayu + '" id="check' + data[
+                                        n]
+                                    .jenis_kayu +
+                                    '" type="checkbox" class="ms-1 form-check-input" checked onclick="cekJenisKayu()">';
+                                html += '   </div>';
+                                html += '   </div>';
+
+                            }
+                            html += '</div>';
+
+                        }
+                        html += '</div>';
+                        document.getElementById('detailm3').innerHTML = html;
                     }
-                    // console.log(datasem);
-                    let html = '<div class=" mt-3 form-control">';
-                    for (n = 0; n < datasem.length; n++) {
-                        html += '<div class="d-flex">';
-                        html += '<div class="col-6">';
-                        html += '<h6>' + datasem[n].jenis + '</h6>';
-                        html += '</div>';
-                        html += '<div class="col-6">';
-                        html += '<h6>' + datasem[n].sum + '</h6>';
-                        html += '</div>';
-                        html += '</div>';
 
-                    }
-                    html += '</div>';
-
-                    document.getElementById('detailm3').innerHTML = html;
 
                 },
                 error: function(data) {
@@ -331,6 +519,76 @@
                 }
             })
 
+        }
+
+        function cekJenisKayu() {
+            if ((document.getElementById('checkSengon') != null && document.getElementById('checkKeras') != null) && (
+                    document.getElementById('checkSengon').hidden != true && document.getElementById('checkKeras').hidden !=
+                    true)) {
+                if (document.getElementById('checkSengon').checked == true && document.getElementById('checkKeras')
+                    .checked == true) {
+                    find_log()
+                } else if (document.getElementById('checkSengon').checked == true) {
+                    console.log('ini sengon');
+                    var select = document.getElementById('supplier');
+                    var selected = [...select.selectedOptions]
+                        .map(option => option.value);
+
+                    let logfind = [];
+                    let hargafind = [];
+                    for (i = 0; i < selected.length; i++) {
+                        var log = log_opc.find(x => x.id == selected[i]);
+                        logfind.push(Number(log.sengon));
+                        hargafind.push(Number(log.harga_sengon));
+                    }
+                    let sum_harga = 0;
+                    let sum = 0;
+                    logfind.forEach((el) => sum += el);
+                    hargafind.forEach((el) => sum_harga += el);
+                    if (sum > 0) {
+                        str = '<div class=" mt-3 col-12">';
+                        str += '<span class="input-group-text">' + sum.toFixed(4) + '</span>';
+                        str += '<input hidden id="log_kubik" name="log_kubik" value="' + sum.toFixed(4) + '">';
+                        str += '<input hidden id="log_harga" name="log_harga" value="' + sum_harga + '">';
+                        str += '</div>';
+                    } else {
+                        str = '';
+                    }
+                    document.getElementById('logm3').innerHTML = str;
+                } else if (document.getElementById('checkKeras').checked == true) {
+                    console.log('ini keras');
+                    var select = document.getElementById('supplier');
+                    var selected = [...select.selectedOptions]
+                        .map(option => option.value);
+
+                    let logfind = [];
+                    let hargafind = [];
+                    for (i = 0; i < selected.length; i++) {
+                        var log = log_opc.find(x => x.id == selected[i]);
+                        logfind.push(Number(log.keras));
+                        hargafind.push(Number(log.harga_keras));
+                    }
+                    let sum_harga = 0;
+                    let sum = 0;
+                    logfind.forEach((el) => sum += el);
+                    hargafind.forEach((el) => sum_harga += el);
+                    if (sum > 0) {
+                        str = '<div class=" mt-3 col-12">';
+                        str += '<span class="input-group-text">' + sum.toFixed(4) + '</span>';
+                        str += '<input hidden id="log_kubik" name="log_kubik" value="' + sum.toFixed(4) + '">';
+                        str += '<input hidden id="log_harga" name="log_harga" value="' + sum_harga + '">';
+                        str += '</div>';
+                    } else {
+                        str = '';
+                    }
+                    document.getElementById('logm3').innerHTML = str;
+                } else {
+                    console.log('ini lain');
+                    find_log()
+                }
+            } else {
+                find_log()
+            }
         }
 
         // console.log(localStorage.getItem("supplier"));
@@ -347,7 +605,7 @@
             if (localStorage.getItem("supplier") != '') {
                 var valuesSelected = localStorage.getItem("supplier");
                 const myArray = valuesSelected.split(",");
-                console.log(myArray);
+                // console.log(myArray);
                 $('#supplier').val(myArray);
                 $('#supplier').trigger('change');
                 $('#supplier').next(".select2").hide();

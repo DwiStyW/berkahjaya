@@ -1,6 +1,6 @@
 @extends('layout.master')
 @section('title')
-    Edit Hasil Produk
+    Edit Penjualan
 @endsection
 @section('css')
     <!-- plugin css -->
@@ -16,7 +16,7 @@
             Berkah Jaya
         @endslot
         @slot('title')
-            Edit Hasil Produk
+            Edit Penjualan
         @endslot
     @endcomponent
     <div class="row">
@@ -59,6 +59,7 @@
                                     <div class="col-md-10">
                                         <input class="form-control" type="text" placeholder="Grade" id="grade"
                                             name="grade" value="{{ $item->grade }}">
+                                        <input hidden id="id_master" name="id_master" value="{{ $item->id_master }}">
                                     </div>
                                 </div>
                                 <div class="mb-3 row">
@@ -68,31 +69,44 @@
                                             name="jenis_kayu" value="{{ $item->jenis_kayu }}">
                                     </div>
                                 </div>
-                                <div class="mb-3 row">
-                                    <label for="vol" class="col-md-2 col-form-label">Size</label>
-                                    <div class="col-md-10">
-                                        <div class="input-group">
-                                            <input class="form-control" type="text" placeholder="000" id="ukuran1"
-                                                onchange="hitungVol()" required name="ukuran1"
-                                                value="{{ $item->ukuran1 }}">
-                                            <span class="input-group-text">*</span>
-                                            <input class="form-control" type="text" placeholder="000" id="ukuran2"
-                                                onchange="hitungVol()" required name="ukuran2"
-                                                value="{{ $item->ukuran2 }}">
-                                            <span class="input-group-text">*</span>
-                                            <input class="form-control" type="text" placeholder="000" id="ukuran3"
-                                                onchange="hitungVol()" required name="ukuran3"
-                                                value="{{ $item->ukuran3 }}">
+                                @if ($item->grade == 'OPC')
+                                    <div class="mb-3 row">
+                                        <label for="vol" class="col-md-2 col-form-label">Size</label>
+                                        <div class="col-md-10">
+                                            <div class="input-group">
+                                                <input class="form-control" type="text" placeholder="000" id="ukuran1"
+                                                    onchange="hitungVol()" required name="ukuran1"
+                                                    value="{{ $item->ukuran1 }}">
+                                                <span class="input-group-text">*</span>
+                                                <input class="form-control" type="text" placeholder="000" id="ukuran2"
+                                                    onchange="hitungVol()" required name="ukuran2"
+                                                    value="{{ $item->ukuran2 }}">
+                                                <span class="input-group-text">*</span>
+                                                <input class="form-control" type="text" placeholder="000"
+                                                    id="ukuran3" onchange="hitungVol()" required name="ukuran3"
+                                                    value="{{ $item->ukuran3 }}">
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="mb-3 row">
-                                    <label for="pcs" class="col-md-2 col-form-label">Pcs</label>
-                                    <div class="col-md-10">
-                                        <input class="form-control" type="text" placeholder="000" id="pcs"
-                                            oninput="hitungVol()" name="pcs" value="{{ $item->pcs }}">
+                                @else
+                                    <div class="mb-3 row">
+                                        <label for="vol" class="col-md-2 col-form-label">Ukuran</label>
+                                        <div class="col-md-10">
+                                            <input class="form-control" type="number" placeholder="0.00" id="ukuran"
+                                                oninput="hitungVol()" name="ukuran" value="{{ $item->ukuran1 }}">
+                                        </div>
                                     </div>
-                                </div>
+                                @endif
+
+                                @if ($item->grade == 'OPC')
+                                    <div class="mb-3 row">
+                                        <label for="pcs" class="col-md-2 col-form-label">Pcs</label>
+                                        <div class="col-md-10">
+                                            <input class="form-control" type="text" placeholder="000" id="pcs"
+                                                oninput="hitungVol()" name="pcs" value="{{ $item->pcs }}">
+                                        </div>
+                                    </div>
+                                @endif
                                 <div class="mb-3 row">
                                     <label for="vol" class="col-md-2 col-form-label">Vol/m3</label>
                                     <div class="col-md-10">
@@ -102,13 +116,15 @@
                                             value="{{ $item->vol_m3 }}">
                                     </div>
                                 </div>
-                                <div class="mb-3 row">
-                                    <label for="crate" class="col-md-2 col-form-label">Crate</label>
-                                    <div class="col-md-10">
-                                        <input class="form-control" type="text" placeholder="0" id="crate"
-                                            name="crate" value="{{ $item->crate }}">
+                                @if ($item->grade == 'OPC')
+                                    <div class="mb-3 row">
+                                        <label for="crate" class="col-md-2 col-form-label">Crate</label>
+                                        <div class="col-md-10">
+                                            <input class="form-control" type="text" placeholder="0" id="crate"
+                                                name="crate" value="{{ $item->crate }}">
+                                        </div>
                                     </div>
-                                </div>
+                                @endif
                                 <div class="mb-3 row">
                                     <label for="harga" class="col-md-2 col-form-label">Harga/m3</label>
                                     <div class="col-md-10">

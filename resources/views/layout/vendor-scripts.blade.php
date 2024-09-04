@@ -13,16 +13,16 @@
     // $('body .dropdown-toggle').dropdown();
     var url = window.location.pathname;
     // console.log(url);
-    @if (Auth::user()->role == '1')
-        if (url == '/produksi') {
-            // $('body').toggleClass('sidebar-enable');
-            if ($(window).width() >= 992) {
-                $('body').toggleClass('vertical-collpsed');
-            } else {
-                $('body').removeClass('vertical-collpsed');
-            }
-        }
-    @endif
+    // @if (Auth::user()->role == '1')
+    //     if (url == '/produksi') {
+    //         // $('body').toggleClass('sidebar-enable');
+    //         if ($(window).width() >= 992) {
+    //             $('body').toggleClass('vertical-collpsed');
+    //         } else {
+    //             $('body').removeClass('vertical-collpsed');
+    //         }
+    //     }
+    // @endif
 </script>
 
 @yield('script')

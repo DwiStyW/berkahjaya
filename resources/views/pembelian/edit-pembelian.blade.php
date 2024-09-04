@@ -11,6 +11,34 @@
     <link href="{{ URL::asset('/assets/libs/bootstrap-touchspin/bootstrap-touchspin.min.css') }}" rel="stylesheet" />
     <link rel="stylesheet" href="{{ URL::asset('/assets/libs/datepicker/datepicker.min.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <style>
+        table.dataTable.cell-border thead th {
+            border: 1px solid rgba(0, 0, 0, 0.25);
+            text-align: center;
+        }
+
+        table.dataTable.cell-border tbody th,
+        table.dataTable.cell-border tbody td {
+            border-top: 1px solid rgba(0, 0, 0, 0.15);
+            border-right: 1px solid rgba(0, 0, 0, 0.15);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+            padding: 5px 10px 5px 10px;
+        }
+
+        table.dataTable.cell-border thead tr th {
+            padding: 5px 10px 5px 10px;
+        }
+
+        table.dataTable.cell-border tbody tr th:first-child,
+        table.dataTable.cell-border tbody tr td:first-child {
+            border-left: 1px solid rgba(0, 0, 0, 0.15);
+        }
+
+        /* table.dataTable.cell-border tbody tr:first-child th,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                table.dataTable.cell-border tbody tr:first-child td {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    border-top: none;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                } */
+    </style>
 @endsection
 @section('content')
     @component('common-components.breadcrumb')
@@ -37,7 +65,7 @@
                                         <input type="text" class="form-control" placeholder="dd M, yyyy"
                                             data-date-format="dd M, yyyy" data-date-container='#datepicker2'
                                             data-provide="datepicker" data-date-autoclose="true" id="tanggal"
-                                            name="tanggal" onchange="setTanggal()" required disabled>
+                                            name="tanggal" required>
 
                                         <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
                                     </div>
@@ -47,7 +75,22 @@
                                 <label for="supplier" class="col-md-2 col-form-label">Supplier</label>
                                 <div class="col-md-10">
                                     <input class="form-control" type="text" placeholder="nama supplier" id="supplier"
-                                        name="supplier" oninput="setSupplier()" disabled>
+                                        name="supplier">
+                                </div>
+                            </div>
+                            <div class="mb-3 row">
+                                <label for="tipeHarga" class="col-md-2 col-form-label">Tipe Harga</label>
+                                <div class="d-flex col-md-10">
+                                    <div class="col-form-label">
+                                        <input type="checkbox" class=" form-check-input" type="hidden" id="harga_baru"
+                                            checked name="harga_baru" onclick="Hargabaru()">
+                                        <span>Harga Baru</span>
+                                    </div>
+                                    <div class="ms-3 col-form-label">
+                                        <input type="checkbox" class=" form-check-input" type="hidden" id="harga_lama"
+                                            name="harga_lama" onclick="Hargalama()">
+                                        <span>Harga Lama</span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="mb-3 row">
@@ -62,47 +105,34 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="mb-3 row">
-                                <label for="vol" class="col-md-2 col-form-label">Model</label>
-                                <div class="col-md-10">
-                                    <select class="form-control select2" name="id_model" id="id_model"
-                                        onchange="pilihModel()">
-                                        <option value="null" disabled selected>Pilih Model</option>
-                                    </select>
-                                    <div id="detail" class="input-group">
-
+                            <div id="tampil_model" style="display:none">
+                                <div class="mb-3 row">
+                                    <div class="col-md-12 text-center">
+                                        <div class="d-flex col-12">
+                                            <div class="col-2 border  bg-soft-secondary">
+                                                <label class="col-form-label">Model</label>
+                                            </div>
+                                            <div class="col-1 border  bg-soft-secondary">
+                                                <label class="col-form-label">Afkir</label>
+                                            </div>
+                                            <div class="col-1 border  bg-soft-secondary">
+                                                <label class="col-form-label">Pakem</label>
+                                            </div>
+                                            <div class="col-2 border  bg-soft-secondary">
+                                                <label class="col-form-label">Jumlah</label>
+                                            </div>
+                                            <div class="col-2 border  bg-soft-secondary">
+                                                <label class="col-form-label">Volume</label>
+                                            </div>
+                                            <div class="col-2 border  bg-soft-secondary">
+                                                <label class="col-form-label">Harga</label>
+                                            </div>
+                                            <div class="col-2 border  bg-soft-secondary">
+                                                <label class="col-form-label">Rupiah</label>
+                                            </div>
+                                        </div>
+                                        <div id="model_field"></div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="mb-3 row">
-                                <label for="vol" class="col-md-2 col-form-label">Afkir</label>
-                                <div class="col-md-10">
-                                    <div class="form-check pt-2">
-                                        <input type="checkbox" class="form-check-input" name="afkir" id="afkir"
-                                            onclick="cekAfkir()">
-                                        <label class="form-check-label" for="afkir" id="afkir_label">Non Afkir</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mb-3 row">
-                                <label for="supplier" class="col-md-2 col-form-label">Jumlah</label>
-                                <div class="col-md-10">
-                                    <input class="form-control" type="number" placeholder="jumlah total" id="jumlah"
-                                        name="jumlah" oninput="hitungVolHarga()">
-                                </div>
-                            </div>
-                            <div class="mb-3 row">
-                                <label for="supplier" class="col-md-2 col-form-label">Volume</label>
-                                <div class="col-md-10">
-                                    <input class="form-control" type="text" placeholder="jumlah volume" id="vol"
-                                        name="vol">
-                                </div>
-                            </div>
-                            <div class="mb-3 row">
-                                <label for="harga" class="col-md-2 col-form-label">Rupiah</label>
-                                <div class="col-md-10">
-                                    <input class="form-control" type="text" data-type="currency"
-                                        placeholder="Rp 0,00" id="total_harga" name="total_harga">
                                 </div>
                             </div>
                             <div class="float-end">
@@ -127,27 +157,44 @@
                             <h6 class="text-secondary">{{ $i->jenis_muatan }}</h6>
                             <div class="mb-3">
                                 <table id="datatable{{ $i->id_master_mentah }}"
-                                    class="table table-bordered dt-responsive nowrap "
+                                    class="dataTable cell-border table-bordered dt-responsive nowrap border-secondary"
                                     style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                                    <thead class="bg-secondary text-white">
+                                    <thead class="bg-soft-secondary text-dark">
                                         <tr>
-                                            <th colspan="2">Model</th>
+                                            <th>Model</th>
+                                            <th></th>
                                             <th>Pakem</th>
                                             <th>Jumlah</th>
                                             <th>Volume</th>
                                             <th>Harga</th>
-                                            <th>Total</th>
+                                            <th>Rupiah</th>
                                             <th>Aksi</th>
                                         </tr>
 
                                     </thead>
 
                                     <tbody>
+                                        @php
+                                            $jumlah = [];
+                                            $volume = [];
+                                            $rupiah = [];
+                                        @endphp
                                         @foreach ($detail_pembelian as $item)
                                             @if ($i->id_master_mentah == $item->id_master_mentah)
+                                                @php
+                                                    array_push($jumlah, $item->jumlah);
+                                                    array_push($volume, $item->vol);
+                                                    array_push($rupiah, $item->total_harga);
+                                                @endphp
                                                 <tr>
 
-                                                    <td>{{ $item->kelas_model }}</td>
+                                                    <td>
+                                                        @if ($item->status != 'afkir')
+                                                            {{ $item->kelas_model }}
+                                                        @else
+                                                            {{ $item->status }}
+                                                        @endif
+                                                    </td>
                                                     <td>{{ $item->model }}</td>
                                                     <td>{{ $item->pakem_pembulatan }}</td>
                                                     <td>{{ $item->jumlah }}</td>
@@ -157,7 +204,7 @@
                                                     <td>
                                                         <ul class="list-inline mb-0">
                                                             <li class="list-inline-item">
-                                                                <a onclick="hapus('{{ Crypt::encrypt($item->id) }}')"
+                                                                <a onclick="hapus('{{ Crypt::encrypt($item->id) }}','{{ $item->kode_pembelian }}')"
                                                                     data-bs-toggle="modal" data-bs-target="#hapusmodal"
                                                                     class="px-2 text-danger">
                                                                     <i class="uil uil-trash-alt font-size-18"></i>
@@ -169,13 +216,76 @@
                                             @endif
                                         @endforeach
                                     </tbody>
-
+                                    <tbody class="bg-light">
+                                        <tr>
+                                            <th>Total</th>
+                                            <th></th>
+                                            <th></th>
+                                            <th>{{ array_sum($jumlah) }}</th>
+                                            <th>{{ array_sum($volume) }}</th>
+                                            <th></th>
+                                            <th>{{ 'Rp ' . number_format(array_sum($rupiah), 0, ',', '.') }}</th>
+                                            <th></th>
+                                        </tr>
+                                    </tbody>
                                 </table>
                             </div>
                         @endforeach
+                        <table class="dataTable cell-border table-bordered border-light w-100">
+                            <thead>
+                                <tr class="bg-light">
+                                    <th>Jenis Kayu</th>
+                                    <th>Jumlah</th>
+                                    <th>Volume</th>
+                                    <th>Rupiah</th>
+                                </tr>
+                            </thead>
+                            @php
+                                $total_jumlah = [];
+                                $total_volume = [];
+                                $total_rupiah = [];
+                            @endphp
+                            @foreach ($detail_pembelian_group as $i)
+                                @php
+                                    $jumlah = [];
+                                    $volume = [];
+                                    $rupiah = [];
+                                @endphp
+                                @foreach ($detail_pembelian as $item)
+                                    @if ($i->id_master_mentah == $item->id_master_mentah)
+                                        @php
+                                            array_push($jumlah, $item->jumlah);
+                                            array_push($volume, $item->vol);
+                                            array_push($rupiah, $item->total_harga);
+                                        @endphp
+                                    @endif
+                                @endforeach
+                                @php
+                                    array_push($total_jumlah, array_sum($jumlah));
+                                    array_push($total_volume, array_sum($volume));
+                                    array_push($total_rupiah, array_sum($rupiah));
+                                @endphp
+                                <tbody>
+                                    <tr>
+                                        <td>{{ $i->jenis_muatan }}</td>
+                                        <td>{{ array_sum($jumlah) }}</td>
+                                        <td>{{ array_sum($volume) }}</td>
+                                        <td>{{ 'Rp ' . number_format(array_sum($rupiah), 0, ',', '.') }}</td>
+                                    </tr>
+                                </tbody>
+                            @endforeach
+                            <tbody>
+                                <tr class="bg-light">
+                                    <th>Total</th>
+                                    <th>{{ array_sum($total_jumlah) }}</th>
+                                    <th>{{ array_sum($total_volume) }}</th>
+                                    <th>{{ 'Rp ' . number_format(array_sum($total_rupiah), 0, ',', '.') }}</th>
+                                </tr>
+                            </tbody>
+                        </table>
                         <div class="float-end">
-                            <a href="/pembelian-update/{{ Crypt::encrypt($p->kode_pembelian) }}" onclick="resetVal()"
-                                id="simpan_produksi" class="btn btn-md btn-primary">Simpan</a>
+                            <a onclick="resetVal('{{ Crypt::encrypt($p->kode_pembelian) }}')" id="simpan_produksi"
+                                class="btn btn-md btn-primary">Simpan</a>
                         </div>
                     </div>
                 </div>
@@ -183,7 +293,7 @@
             </div>
         </div>
     </div>
-    @include('pembelian.delete-detail-pembelian')
+    @include('pembelian.delete-detail-pembelian-edit')
 @endsection
 @section('script')
     <script src="{{ URL::asset('/assets/libs/datatables/datatables.min.js') }}"></script>
@@ -200,61 +310,85 @@
         $(document).ready(function() {
             $('#datatable1').DataTable({
                 dom: '<"table-responsive w-100"<t>>',
-
+                order: [
+                    [0, 'desc']
+                ],
+                rowsGroup: [0],
                 columnDefs: [{
                     render: $.fn.dataTable.render.number('.', ',', 0, 'Rp '),
                     targets: [5, 6]
-                }]
+                }],
+                paging: false,
             });
         });
         $(document).ready(function() {
             $('#datatable2').DataTable({
                 dom: '<"table-responsive w-100"<t>>',
-
+                order: [
+                    [0, 'desc']
+                ],
+                rowsGroup: [0],
                 columnDefs: [{
                     render: $.fn.dataTable.render.number('.', ',', 0, 'Rp '),
                     targets: [5, 6]
-                }]
+                }],
+                paging: false,
             });
         });
         $(document).ready(function() {
             $('#datatable3').DataTable({
                 dom: '<"table-responsive w-100"<t>>',
-
+                order: [
+                    [0, 'desc']
+                ],
+                rowsGroup: [0],
                 columnDefs: [{
                     render: $.fn.dataTable.render.number('.', ',', 0, 'Rp '),
                     targets: [5, 6]
-                }]
+                }],
+                paging: false,
             });
         });
         $(document).ready(function() {
             $('#datatable4').DataTable({
                 dom: '<"table-responsive w-100"<t>>',
-
+                order: [
+                    [0, 'desc']
+                ],
+                rowsGroup: [0],
                 columnDefs: [{
                     render: $.fn.dataTable.render.number('.', ',', 0, 'Rp '),
                     targets: [5, 6]
-                }]
+                }],
+                paging: false,
             });
         });
         $(document).ready(function() {
             $('#datatable5').DataTable({
                 dom: '<"table-responsive w-100"<t>>',
-
+                order: [
+                    [0, 'desc']
+                ],
+                rowsGroup: [0],
                 columnDefs: [{
                     render: $.fn.dataTable.render.number('.', ',', 0, 'Rp '),
                     targets: [5, 6]
-                }]
+                }],
+                paging: false,
             });
         });
         $(document).ready(function() {
             $('#datatable6').DataTable({
                 dom: '<"table-responsive w-100"<t>>',
-
+                order: [
+                    [0, 'desc']
+                ],
+                rowsGroup: [0],
                 columnDefs: [{
                     render: $.fn.dataTable.render.number('.', ',', 0, 'Rp '),
                     targets: [5, 6]
-                }]
+                }],
+                paging: false,
             });
         });
         // $.fn.dataTable.ext.errMode = 'none';
@@ -356,8 +490,14 @@
 
         function pilihMaster() {
             var id_master = document.getElementById('id_master_mentah').value;
-            console.log(id_master);
+            document.getElementById('tampil_model').style.display = 'block';
+            // console.log(id_master);
             $('#id_model').empty().trigger("change");
+            if (document.getElementById('harga_lama').checked == true) {
+                tipeHarga = 'lama';
+            } else if (document.getElementById('harga_baru').checked == true) {
+                tipeHarga = 'baru';
+            }
 
             $.ajax({
                 type: 'POST',
@@ -367,27 +507,111 @@
                 },
                 success: function(data) {
                     // console.log(data);
-                    var dataModel = [];
+                    str = '';
+                    str += '<input name="indexLoop" hidden class="form-control" value="' + data.length + '">';
                     for (i = 0; i < data.length; i++) {
-                        if (data[i].kelas_model != null) {
-                            var kelas_model = data[i].kelas_model;
+                        // console.log(i);
+                        if (data[i].kelas_model == null) {
+                            kelas_model = '';
                         } else {
-                            var kelas_model = "";
+                            kelas_model = data[i].kelas_model;
                         }
-                        dataModel.push({
-                            id: data[i].id,
-                            text: kelas_model + '     ' + data[i].model
+
+                        // tipeharga
+                        if (tipeHarga == 'lama') {
+                            harga = data[i].harga_khusus;
+                        } else if (tipeHarga == 'baru') {
+                            harga = data[i].harga;
+                        }
+                        // pakem
+                        pakem = Number(data[i].pakem)
+                        roundedString = pakem.toFixed(3);
+                        rounded = Number(roundedString);
+
+                        // rupiah
+                        var rupiah = new Intl.NumberFormat("id-ID", {
+                            style: "currency",
+                            currency: "IDR"
+                        }).format(harga);
+                        str += '<div class="col-12 d-flex">';
+                        str += '<div class="col-2 d-flex border">';
+                        str += '<div class="col-6">';
+                        str += '<input id="kelas_model' + i + '" name="kelas_model' + i +
+                            '" class="form-control" disabled value="' + kelas_model + '">';
+                        str += '<input name="id_model' + i + '" hidden class="form-control" value="' + data[i]
+                            .id + '">';
+                        str += '</div>';
+                        str += '<div class="col-6">';
+                        str += '<input id="model' + i + '" name="model' + i +
+                            '" class="form-control" disabled value="' + data[i].model + '">';
+                        str += '</div>';
+                        str += '</div>';
+                        str += '<div class="col-1 pt-2 border border-light bg-soft-light">';
+                        str +=
+                            '<input type="checkbox" class=" form-check-input" name="afkir' + i + '" id="afkir' +
+                            i + '" onclick="cekAfkir(' + i + ',' + harga + ')">';
+                        str += '</div>';
+                        str += '<div class="col-1 border">';
+                        str += '<input class="form-control" disabled value="' + rounded + '">';
+                        str += '<input id="pakem' + i + '" name="pakem' + i +
+                            '" class="form-control" hidden value="' + data[i]
+                            .pakem + '">';
+                        str += '</div>';
+                        str += '<div class="col-2 ">';
+                        str += '<input id="jumlah' + i + '" name="jumlah' + i +
+                            '" class="form-control formJumlah" type="text" oninput="hitung(' + i + ')">';
+                        str += '</div>';
+                        str += '<div class="col-2 border">';
+                        str += '<input id="volume' + i + '" name="volume' + i + '" class="form-control">';
+                        str += '</div>';
+                        str += '<div class="col-2 border">';
+                        str += '<input id="harga_rupiah' + i + '" class="form-control" disabled value="' +
+                            rupiah + '">';
+                        str += '<input id="harga' + i + '" name="harga' + i +
+                            '" hidden class="form-control" value="' + harga + '">';
+                        str += '</div>';
+                        str += '<div class="col-2 border">';
+                        str += '<input id="rupiah' + i + '" name="rupiah' + i + '" class="form-control">';
+                        str += '</div>';
+                        str += '</div>';
+                    }
+                    document.getElementById('model_field').innerHTML = str;
+                    var formJumlah = document.querySelectorAll('.formJumlah')
+                    // console.log(allField);
+
+                    for (var i = 0; i < formJumlah.length; i++) {
+                        formJumlah[i].addEventListener("keyup", function(event) {
+
+                            if (event.keyCode === 40) {
+                                console.log("clicked")
+                                // event.preventDefault();
+                                if (this.parentElement.parentElement.nextElementSibling.querySelector(
+                                        '.formJumlah')) {
+                                    this.parentElement.parentElement.nextElementSibling.querySelector(
+                                        '.formJumlah').focus();
+                                }
+                            }
+
+                            if (event.keyCode === 38) {
+                                console.log("clicked")
+                                // event.preventDefault();
+                                if (this.parentElement.parentElement.previousElementSibling
+                                    .querySelector(
+                                        '.formJumlah')) {
+                                    this.parentElement.parentElement.previousElementSibling
+                                        .querySelector(
+                                            '.formJumlah').focus();
+                                }
+                            }
+
                         })
                     }
-
-
-                    $("#id_model").select2({
-                        data: dataModel
-                    });
-                    $('#id_model').select2().trigger("change");
+                },
+                error: function(e) {
+                    console.log(e);
                 }
             });
-            document.getElementById('detail').innerHTML = '';
+
         }
 
         function rp(n) {
@@ -398,50 +622,15 @@
             return rupiah;
         }
 
-        function pilihModel() {
-            var id_model = document.getElementById('id_model').value;
-            // console.log(id_model);
-            $.ajax({
-                type: 'POST',
-                url: "{{ route('getDetailmodel') }}",
-                data: {
-                    id_model: id_model,
-                },
-                success: function(data) {
-                    // console.log(data);
-
-
-                    str = '<span class="input-group-text">Pakem</span>';
-                    str += '<input id="pakem" type="hidden" value="' + data[0].pakem +
-                        '">';
-                    str += '<input id="pakem_pembulatan" class="form-control input-group-text" value="' +
-                        data[0].pakem_pembulatan + '">';
-                    str += '<span class="input-group-text">Harga</span>';
-                    str += '<input id="harga" name="harga" type="hidden" value="' + data[0].harga +
-                        '">';
-                    str += '<input id="harga_rupiah" class="form-control input-group-text" value="' +
-                        rp(data[0].harga) +
-                        '">';
-
-                    document.getElementById('detail').innerHTML = str;
-                    hitungVolHarga()
-                    cekAfkir()
-                },
-                error: function(e) {
-                    console.log(e);
-                }
-            });
-
-        }
-
-        function hitungVolHarga() {
-            var jumlah = document.getElementById('jumlah').value;
-            var pakem = document.getElementById('pakem').value;
-            var harga = document.getElementById('harga').value;
-
+        function hitung(n) {
+            var pakem = document.getElementById('pakem' + n).value;
+            var jumlah = document.getElementById('jumlah' + n).value;
+            var harga = document.getElementById('harga' + n).value;
+            var index = n + 1;
+            // console.log(n);
             var volume = jumlah * pakem;
             // var total = volume * harga;
-            if (document.getElementById('afkir').checked == true) {
+            if (document.getElementById('afkir' + n).checked == true) {
                 var total = volume * 200000;
             } else {
                 var total = volume * harga;
@@ -454,43 +643,57 @@
                 style: "currency",
                 currency: "IDR"
             }).format(totalHarga);
-
-            document.getElementById('vol').value = totalVolume;
-            document.getElementById('total_harga').value = rupiah;
-        }
-
-        function setTanggal() {
-            localStorage.setItem("tanggal", document.getElementById('tanggal').value);
-        }
-
-        function setSupplier() {
-            localStorage.setItem("supplier", document.getElementById('supplier').value);
-        }
-
-        function resetVal() {
-            localStorage.removeItem("tanggal");
-            localStorage.removeItem("supplier");
-        }
-
-        function cekAfkir() {
-            if (document.getElementById('afkir').checked == true) {
-                document.getElementById('afkir_label').innerHTML = 'Afkir';
-                document.getElementById('harga').value = 200000;
-                document.getElementById('harga_rupiah').value = rp(200000);
+            // console.log(jumlah);
+            if (jumlah == '') {
+                document.getElementById('volume' + n).value = '';
+                document.getElementById('rupiah' + n).value = '';
             } else {
-                document.getElementById('afkir_label').innerHTML = 'Non Afkir';
-                pilihModel()
+                document.getElementById('volume' + n).value = totalVolume;
+                document.getElementById('rupiah' + n).value = rupiah;
             }
-            hitungVolHarga()
+
         }
+
+        function Hargabaru() {
+            $('#harga_lama').prop('checked', false).removeAttr('checked');
+            pilihMaster()
+        }
+
+        function Hargalama() {
+            $('#harga_baru').prop('checked', false).removeAttr('checked');
+            pilihMaster()
+        }
+
         var tanggal = @json($tanggal);
+
         var supplier = @json($supplier);
+        console.log(supplier);
         if (tanggal != '') {
             let dateFormat1 = moment(tanggal).format('DD MMM, yyyy');
             document.getElementById('tanggal').value = dateFormat1;
         }
         if (supplier != '') {
             document.getElementById('supplier').value = supplier;
+        }
+
+        function resetVal(n) {
+            localStorage.removeItem("tanggal");
+            localStorage.removeItem("supplier");
+            tanggal = document.getElementById('tanggal').value;
+            supplier = document.getElementById('supplier').value;
+
+            window.location.href = '/pembelian-update/' + n + '/' + tanggal + '/' + supplier;
+        }
+
+        function cekAfkir(n, harga) {
+            if (document.getElementById('afkir' + n).checked == true) {
+                document.getElementById('harga' + n).value = 200000;
+                document.getElementById('harga_rupiah' + n).value = rp(200000);
+            } else {
+                document.getElementById('harga' + n).value = harga;
+                document.getElementById('harga_rupiah' + n).value = rp(harga);
+            }
+            hitung(n)
         }
     </script>
 @endsection

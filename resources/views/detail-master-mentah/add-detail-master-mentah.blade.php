@@ -51,10 +51,17 @@
                                 </div>
                             </div>
                             <div class="mb-3 row">
-                                <label for="hasil_produksi" class="col-md-2 col-form-label">Harga</label>
+                                <label for="hasil_produksi" class="col-md-2 col-form-label">Harga Baru</label>
                                 <div class="col-md-10">
                                     <input class="form-control" type="text" placeholder="0.00" id="harga"
                                         name="harga">
+                                </div>
+                            </div>
+                            <div class="mb-3 row">
+                                <label for="hasil_produksi" class="col-md-2 col-form-label">Harga Lama</label>
+                                <div class="col-md-10">
+                                    <input class="form-control" type="text" placeholder="0.00" id="harga_khusus"
+                                        name="harga_khusus">
                                 </div>
                             </div>
                             <div class="float-end">

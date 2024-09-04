@@ -81,6 +81,11 @@
                                                     Detail</a>
                                             </li>
                                             <li class="list-inline-item">
+                                                <a href="pembelian-edit-info/{{ Crypt::encrypt($item->kode_pembelian) }}"
+                                                    title="edit info" class="px-2 text-primary"><i
+                                                        class="uil uil-file-edit-alt font-size-18"></i></a>
+                                            </li>
+                                            <li class="list-inline-item">
                                                 <a href="pembelian-edit/{{ Crypt::encrypt($item->kode_pembelian) }}"
                                                     class="px-2 text-primary"><i class="uil uil-pen font-size-18"></i></a>
                                             </li>

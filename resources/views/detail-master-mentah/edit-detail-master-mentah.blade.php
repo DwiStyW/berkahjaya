@@ -1,6 +1,6 @@
 @extends('layout.master')
 @section('title')
-    Edit Hasil Produk
+    Edit Detail Master Mentah
 @endsection
 @section('css')
     <!-- plugin css -->
@@ -16,7 +16,7 @@
             Berkah Jaya
         @endslot
         @slot('title')
-            Edit Hasil Produk
+            Edit Detail Master Mentah
         @endslot
     @endcomponent
     <div class="row">
@@ -52,10 +52,17 @@
                                     </div>
                                 </div>
                                 <div class="mb-3 row">
-                                    <label for="hasil_produksi" class="col-md-2 col-form-label">Harga</label>
+                                    <label for="hasil_produksi" class="col-md-2 col-form-label">Harga Baru</label>
                                     <div class="col-md-10">
                                         <input class="form-control" type="text" value="{{ $item->harga }}"
                                             id="harga" name="harga">
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label for="hasil_produksi" class="col-md-2 col-form-label">Harga Lama</label>
+                                    <div class="col-md-10">
+                                        <input class="form-control" type="text" value="{{ $item->harga_khusus }}"
+                                            id="harga_khusus" name="harga_khusus">
                                     </div>
                                 </div>
                                 <div class="float-end">
@@ -79,6 +86,17 @@
     <script src="{{ URL::asset('/assets/libs/datepicker/datepicker.min.js') }}"></script>
     <script src="{{ URL::asset('/assets/js/pages/form-advanced.init.js') }}"></script>
     <script>
+        let mastermentah = @json($mastermentah);
+        var model = document.getElementById('model').value;
+        var rumus_a = mastermentah[0].rumus_a;
+        var rumus_b = mastermentah[0].rumus_b;
+        var rumus_c = mastermentah[0].rumus_c;
+        var pakem = model * model * rumus_a * rumus_b / rumus_c;
+        var roundedString = pakem.toFixed(3);
+        var rounded = Number(roundedString);
+        document.getElementById('pakem').value = pakem;
+        document.getElementById('pakem_pembulatan').value = rounded;
+
         function hitungpakem() {
             let mastermentah = @json($mastermentah);
             var model = document.getElementById('model').value;

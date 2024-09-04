@@ -13,6 +13,8 @@ class Pembelian extends Model
         'tanggal',
         'kode_pembelian',
         'supplier',
+        'jumlah_truk',
+        'no_truk',
         'vol',
         'total_harga',
     ];

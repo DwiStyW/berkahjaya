@@ -111,7 +111,7 @@
     <script>
         $(document).ready(function() {
             var table = $('#datatable').DataTable({
-                dom: '<"table-responsive w-100"<t>>',
+                dom: 'fr<"table-responsive w-100"<t>>',
                 columnDefs: [{
                     render: $.fn.dataTable.render.number('.', ',', 0, 'Rp '),
                     targets: [3]

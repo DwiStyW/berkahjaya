@@ -16,5 +16,6 @@ class StockLogMasukKeras extends Model
         'volume',
         'harga',
         'ket',
+        'status',
     ];
 }

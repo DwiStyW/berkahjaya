@@ -13,6 +13,7 @@ class DetailPembelian extends Model
         'tanggal',
         'kode_pembelian',
         'supplier',
+        'no_truk',
         'id_master_mentah',
         'id_model',
         'status',

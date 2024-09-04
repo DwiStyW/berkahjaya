@@ -1,6 +1,6 @@
 @extends('layout.master')
 @section('title')
-    Edit Hasil Produk
+    Edit Master Mentah
 @endsection
 @section('css')
     <!-- plugin css -->
@@ -16,7 +16,7 @@
             Berkah Jaya
         @endslot
         @slot('title')
-            Edit Hasil Produk
+            Edit Master Mentah
         @endslot
     @endcomponent
     <div class="row">

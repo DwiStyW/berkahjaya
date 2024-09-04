@@ -1,6 +1,6 @@
 @extends('layout.master')
 @section('title')
-    Hasil Produk
+    Master Mentah
 @endsection
 @section('css')
     <!-- DataTables -->
@@ -41,7 +41,7 @@
             Berkah Jaya
         @endslot
         @slot('title')
-            Hasil Produk
+            Master Mentah
         @endslot
     @endcomponent
 
@@ -88,6 +88,7 @@
                                                 <a href="mastermentah-edit/{{ Crypt::encrypt($item->id) }}"
                                                     class="px-2 text-primary"><i class="uil uil-pen font-size-18"></i></a>
                                             </li>
+
                                             {{-- <li class="list-inline-item">
                                                 <a onclick="hapus('{{ Crypt::encrypt($item->id) }}')" data-bs-toggle="modal"
                                                     data-bs-target="#hapusmodal" class="px-2 text-danger">
@@ -114,7 +115,7 @@
     <script>
         $(document).ready(function() {
             var table = $('#datatable').DataTable({
-                dom: '<"table-responsive w-100"<t>>',
+                dom: 'fr<"table-responsive w-100"<t>>',
                 // columnDefs: [{
                 //     render: $.fn.dataTable.render.number('.', ',', 0, 'Rp '),
                 //     targets: [3]

@@ -1,6 +1,6 @@
 @extends('layout.master')
 @section('title')
-    Hasil Produk
+    Stock
 @endsection
 @section('css')
     <!-- DataTables -->
@@ -43,7 +43,7 @@
             Berkah Jaya
         @endslot
         @slot('title')
-            Hasil Produk
+            Stock
         @endslot
     @endcomponent
 
@@ -58,7 +58,9 @@
                             <tr>
                                 <th>Jenis</th>
                                 <th>Volume</th>
-                                <th>Rupiah</th>
+                                @if (Auth::user()->role == '1')
+                                    <th>Rupiah</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
@@ -85,14 +87,14 @@
                                             @php
                                                 $no_lm++;
                                                 // volume
-                                                $saldomutasiV_lm = 0 + $saldoVM_lm + $saldoVK_lm;
+                                                $saldomutasiV_lm = 0 + $saldoVM_lm - $saldoVK_lm;
                                                 if ($saldoVM_lm > 0) {
                                                     $saldomutasi1V_lm = $saldomutasiV_lm + $saldoVK_lm;
                                                 } else {
                                                     $saldomutasi1V_lm = $saldomutasiV_lm - $saldoVM_lm;
                                                 }
                                                 // harga
-                                                $saldomutasiH_lm = 0 + $saldoHM_lm + $saldoHK_lm;
+                                                $saldomutasiH_lm = 0 + $saldoHM_lm - $saldoHK_lm;
                                                 if ($saldoHM_lm > 0) {
                                                     $saldomutasi1H_lm = $saldomutasiH_lm + $saldoHK_lm;
                                                 } else {
@@ -111,7 +113,7 @@
                                             @endphp
                                         @endif
                                     @endforeach
-                                    <th>Log Masuk</th>
+                                    <th>Log Masuk Sengon</th>
                                     <td>
                                         @if (round($saldomutasi1V_lm, 4) == -0)
                                             {{ 0 }}
@@ -119,9 +121,73 @@
                                             {{ round($saldomutasi1V_lm, 4) }}
                                         @endif
                                     </td>
-                                    <td>{{ 'Rp ' . number_format($saldomutasi1H_lm, 0, ',', '.') }}</td>
+                                    @if (Auth::user()->role == '1')
+                                        <td>{{ 'Rp ' . number_format($saldomutasi1H_lm, 0, ',', '.') }}</td>
+                                    @endif
                                 @endif
                             </tr>
+                            {{-- <tr>
+                                @php
+                                    $no_ls260 = 1;
+                                @endphp
+                                @if (count($logsengon260) != 0)
+                                    @foreach ($logsengon260 as $ls260)
+                                        @php
+                                            if ($ls260->ket == 'masuk') {
+                                                $saldoVM_ls260 = $ls260->volume;
+                                                $saldoVK_ls260 = 0;
+                                                $saldoHM_ls260 = $ls260->harga;
+                                                $saldoHK_ls260 = 0;
+                                            } else {
+                                                $saldoVM_ls260 = 0;
+                                                $saldoVK_ls260 = $ls260->volume;
+                                                $saldoHM_ls260 = 0;
+                                                $saldoHK_ls260 = $ls260->harga;
+                                            }
+                                        @endphp
+                                        @if ($no_ls260 == 1)
+                                            @php
+                                                $no_ls260++;
+                                                // volume
+                                                $saldomutasiV_ls260 = 0 + $saldoVM_ls260 + $saldoVK_ls260;
+                                                if ($saldoVM_ls260 > 0) {
+                                                    $saldomutasi1V_ls260 = $saldomutasiV_ls260 + $saldoVK_ls260;
+                                                } else {
+                                                    $saldomutasi1V_ls260 = $saldomutasiV_ls260 - $saldoVM_ls260;
+                                                }
+                                                // harga
+                                                $saldomutasiH_ls260 = 0 + $saldoHM_ls260 + $saldoHK_ls260;
+                                                if ($saldoHM_ls260 > 0) {
+                                                    $saldomutasi1H_ls260 = $saldomutasiH_ls260 + $saldoHK_ls260;
+                                                } else {
+                                                    $saldomutasi1H_ls260 = $saldomutasiH_ls260 - $saldoHM_ls260;
+                                                }
+                                            @endphp
+                                        @else
+                                            @php
+                                                $no_ls260++;
+                                                // volume
+                                                $sals1V_ls260 = $saldomutasi1V_ls260;
+                                                $saldomutasi1V_ls260 = $sals1V_ls260 + $saldoVM_ls260 - $saldoVK_ls260;
+                                                // harga
+                                                $sals1H_ls260 = $saldomutasi1H_ls260;
+                                                $saldomutasi1H_ls260 = $sals1H_ls260 + $saldoHM_ls260 - $saldoHK_ls260;
+                                            @endphp
+                                        @endif
+                                    @endforeach
+                                    <th>Log Masuk Sengon 260</th>
+                                    <td>
+                                        @if (round($saldomutasi1V_ls260, 4) == -0)
+                                            {{ 0 }}
+                                        @else
+                                            {{ round($saldomutasi1V_ls260, 4) }}
+                                        @endif
+                                    </td>
+                                    @if (Auth::user()->role == '1')
+                                        <td>{{ 'Rp ' . number_format($saldomutasi1H_ls260, 0, ',', '.') }}</td>
+                                    @endif
+                                @endif
+                            </tr> --}}
                             <tr>
                                 @php
                                     $no_lmk = 1;
@@ -145,14 +211,14 @@
                                             @php
                                                 $no_lmk++;
                                                 // volume
-                                                $saldomutasiV_lmk = 0 + $saldoVM_lmk + $saldoVK_lmk;
+                                                $saldomutasiV_lmk = 0 + $saldoVM_lmk - $saldoVK_lmk;
                                                 if ($saldoVM_lmk > 0) {
                                                     $saldomutasi1V_lmk = $saldomutasiV_lmk + $saldoVK_lmk;
                                                 } else {
                                                     $saldomutasi1V_lmk = $saldomutasiV_lmk - $saldoVM_lmk;
                                                 }
                                                 // harga
-                                                $saldomutasiH_lmk = 0 + $saldoHM_lmk + $saldoHK_lmk;
+                                                $saldomutasiH_lmk = 0 + $saldoHM_lmk - $saldoHK_lmk;
                                                 if ($saldoHM_lmk > 0) {
                                                     $saldomutasi1H_lmk = $saldomutasiH_lmk + $saldoHK_lmk;
                                                 } else {
@@ -179,9 +245,73 @@
                                             {{ round($saldomutasi1V_lmk, 4) }}
                                         @endif
                                     </td>
-                                    <td>{{ 'Rp ' . number_format($saldomutasi1H_lmk, 0, ',', '.') }}</td>
+                                    @if (Auth::user()->role == '1')
+                                        <td>{{ 'Rp ' . number_format($saldomutasi1H_lmk, 0, ',', '.') }}</td>
+                                    @endif
                                 @endif
                             </tr>
+                            {{-- <tr>
+                                @php
+                                    $no_lk260 = 1;
+                                @endphp
+                                @if (count($logkeras260) != 0)
+                                    @foreach ($logkeras260 as $lk260)
+                                        @php
+                                            if ($lk260->ket == 'masuk') {
+                                                $saldoVM_lk260 = $lk260->volume;
+                                                $saldoVK_lk260 = 0;
+                                                $saldoHM_lk260 = $lk260->harga;
+                                                $saldoHK_lk260 = 0;
+                                            } else {
+                                                $saldoVM_lk260 = 0;
+                                                $saldoVK_lk260 = $lk260->volume;
+                                                $saldoHM_lk260 = 0;
+                                                $saldoHK_lk260 = $lk260->harga;
+                                            }
+                                        @endphp
+                                        @if ($no_lk260 == 1)
+                                            @php
+                                                $no_lk260++;
+                                                // volume
+                                                $saldomutasiV_lk260 = 0 + $saldoVM_lk260 + $saldoVK_lk260;
+                                                if ($saldoVM_lk260 > 0) {
+                                                    $saldomutasi1V_lk260 = $saldomutasiV_lk260 + $saldoVK_lk260;
+                                                } else {
+                                                    $saldomutasi1V_lk260 = $saldomutasiV_lk260 - $saldoVM_lk260;
+                                                }
+                                                // harga
+                                                $saldomutasiH_lk260 = 0 + $saldoHM_lk260 + $saldoHK_lk260;
+                                                if ($saldoHM_lk260 > 0) {
+                                                    $saldomutasi1H_lk260 = $saldomutasiH_lk260 + $saldoHK_lk260;
+                                                } else {
+                                                    $saldomutasi1H_lk260 = $saldomutasiH_lk260 - $saldoHM_lk260;
+                                                }
+                                            @endphp
+                                        @else
+                                            @php
+                                                $no_lk260++;
+                                                // volume
+                                                $sals1V_lk260 = $saldomutasi1V_lk260;
+                                                $saldomutasi1V_lk260 = $sals1V_lk260 + $saldoVM_lk260 - $saldoVK_lk260;
+                                                // harga
+                                                $sals1H_lk260 = $saldomutasi1H_lk260;
+                                                $saldomutasi1H_lk260 = $sals1H_lk260 + $saldoHM_lk260 - $saldoHK_lk260;
+                                            @endphp
+                                        @endif
+                                    @endforeach
+                                    <th>Log Masuk Keras 260</th>
+                                    <td>
+                                        @if (round($saldomutasi1V_lk260, 4) == -0)
+                                            {{ 0 }}
+                                        @else
+                                            {{ round($saldomutasi1V_lk260, 4) }}
+                                        @endif
+                                    </td>
+                                    @if (Auth::user()->role == '1')
+                                        <td>{{ 'Rp ' . number_format($saldomutasi1H_lk260, 0, ',', '.') }}</td>
+                                    @endif
+                                @endif
+                            </tr> --}}
                         </tbody>
                         <tbody>
                             <tr>
@@ -192,9 +322,17 @@
                                             $saldomutasi1V_lm = 0;
                                             $saldomutasi1H_lm = 0;
                                         }
+                                        if (count($logsengon260) == 0) {
+                                            $saldomutasi1V_ls260 = 0;
+                                            $saldomutasi1H_ls260 = 0;
+                                        }
                                         if (count($logmasukkeras) == 0) {
                                             $saldomutasi1V_lmk = 0;
                                             $saldomutasi1H_lmk = 0;
+                                        }
+                                        if (count($logkeras260) == 0) {
+                                            $saldomutasi1V_lk260 = 0;
+                                            $saldomutasi1H_lk260 = 0;
                                         }
                                     @endphp
                                     @if (round($saldomutasi1V_lm + $saldomutasi1V_lmk, 4) == -0)
@@ -203,7 +341,10 @@
                                         {{ round($saldomutasi1V_lm + $saldomutasi1V_lmk, 4) }}
                                     @endif
                                 </th>
-                                <th>{{ 'Rp ' . number_format($saldomutasi1H_lm + $saldomutasi1H_lmk, 0, ',', '.') }}</th>
+                                @if (Auth::user()->role == '1')
+                                    <th>{{ 'Rp ' . number_format($saldomutasi1H_lm + $saldomutasi1H_lmk, 0, ',', '.') }}
+                                    </th>
+                                @endif
                             </tr>
                         </tbody>
                     </table>
@@ -215,7 +356,9 @@
                             <tr>
                                 <th>Jenis</th>
                                 <th>Volume</th>
-                                <th>Rupiah</th>
+                                @if (Auth::user()->role == '1')
+                                    <th>Rupiah</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
@@ -235,21 +378,22 @@
                                                 $saldoVM_opc = 0;
                                                 $saldoVK_opc = $opc->volume;
                                                 $saldoHM_opc = 0;
-                                                $saldoHK_opc = $opc->harga;
+                                                $saldoHK_opc = $opc->volume * $opc->harga_master;
                                             }
+                                            // var_dump($opc->harga_master);
                                         @endphp
                                         @if ($no_opc == 1)
                                             @php
                                                 $no_opc++;
                                                 // volume
-                                                $saldomutasiV_opc = 0 + $saldoVM_opc + $saldoVK_opc;
+                                                $saldomutasiV_opc = 0 + $saldoVM_opc - $saldoVK_opc;
                                                 if ($saldoVM_opc > 0) {
                                                     $saldomutasi1V_opc = $saldomutasiV_opc + $saldoVK_opc;
                                                 } else {
                                                     $saldomutasi1V_opc = $saldomutasiV_opc - $saldoVM_opc;
                                                 }
                                                 // harga
-                                                $saldomutasiH_opc = 0 + $saldoHM_opc + $saldoHK_opc;
+                                                $saldomutasiH_opc = 0 + $saldoHM_opc - $saldoHK_opc;
                                                 if ($saldoHM_opc > 0) {
                                                     $saldomutasi1H_opc = $saldomutasiH_opc + $saldoHK_opc;
                                                 } else {
@@ -276,7 +420,9 @@
                                             {{ round($saldomutasi1V_opc, 4) }}
                                         @endif
                                     </td>
-                                    <td>{{ 'Rp ' . number_format($saldomutasi1H_opc, 0, ',', '.') }}</td>
+                                    @if (Auth::user()->role == '1')
+                                        <td>{{ 'Rp ' . number_format($saldomutasi1H_opc, 0, ',', '.') }}</td>
+                                    @endif
                                 @endif
                             </tr>
                             <tr>
@@ -295,21 +441,21 @@
                                                 $saldoVM_ppc = 0;
                                                 $saldoVK_ppc = $ppc->volume;
                                                 $saldoHM_ppc = 0;
-                                                $saldoHK_ppc = $ppc->harga;
+                                                $saldoHK_ppc = $ppc->volume * $ppc->harga_master;
                                             }
                                         @endphp
                                         @if ($no_ppc == 1)
                                             @php
                                                 $no_ppc++;
                                                 // volume
-                                                $saldomutasiV_ppc = 0 + $saldoVM_ppc + $saldoVK_ppc;
+                                                $saldomutasiV_ppc = 0 + $saldoVM_ppc - $saldoVK_ppc;
                                                 if ($saldoVM_ppc > 0) {
                                                     $saldomutasi1V_ppc = $saldomutasiV_ppc + $saldoVK_ppc;
                                                 } else {
                                                     $saldomutasi1V_ppc = $saldomutasiV_ppc - $saldoVM_ppc;
                                                 }
                                                 // harga
-                                                $saldomutasiH_ppc = 0 + $saldoHM_ppc + $saldoHK_ppc;
+                                                $saldomutasiH_ppc = 0 + $saldoHM_ppc - $saldoHK_ppc;
                                                 if ($saldoHM_ppc > 0) {
                                                     $saldomutasi1H_ppc = $saldomutasiH_ppc + $saldoHK_ppc;
                                                 } else {
@@ -336,7 +482,9 @@
                                             {{ round($saldomutasi1V_ppc, 4) }}
                                         @endif
                                     </td>
-                                    <td>{{ 'Rp ' . number_format($saldomutasi1H_ppc, 0, ',', '.') }}</td>
+                                    @if (Auth::user()->role == '1')
+                                        <td>{{ 'Rp ' . number_format($saldomutasi1H_ppc, 0, ',', '.') }}</td>
+                                    @endif
                                 @endif
                             </tr>
                             <tr>
@@ -355,21 +503,21 @@
                                                 $saldoVM_mk = 0;
                                                 $saldoVK_mk = $mk->volume;
                                                 $saldoHM_mk = 0;
-                                                $saldoHK_mk = $mk->harga;
+                                                $saldoHK_mk = $mk->volume * $mk->harga_master;
                                             }
                                         @endphp
                                         @if ($no_mk == 1)
                                             @php
                                                 $no_mk++;
                                                 // volume
-                                                $saldomutasiV_mk = 0 + $saldoVM_mk + $saldoVK_mk;
+                                                $saldomutasiV_mk = 0 + $saldoVM_mk - $saldoVK_mk;
                                                 if ($saldoVM_mk > 0) {
                                                     $saldomutasi1V_mk = $saldomutasiV_mk + $saldoVK_mk;
                                                 } else {
                                                     $saldomutasi1V_mk = $saldomutasiV_mk - $saldoVM_mk;
                                                 }
                                                 // harga
-                                                $saldomutasiH_mk = 0 + $saldoHM_mk + $saldoHK_mk;
+                                                $saldomutasiH_mk = 0 + $saldoHM_mk - $saldoHK_mk;
                                                 if ($saldoHM_mk > 0) {
                                                     $saldomutasi1H_mk = $saldomutasiH_mk + $saldoHK_mk;
                                                 } else {
@@ -396,8 +544,9 @@
                                             {{ round($saldomutasi1V_mk, 4) }}
                                         @endif
                                     </td>
-
-                                    <td>{{ 'Rp ' . number_format($saldomutasi1H_mk, 0, ',', '.') }}</td>
+                                    @if (Auth::user()->role == '1')
+                                        <td>{{ 'Rp ' . number_format($saldomutasi1H_mk, 0, ',', '.') }}</td>
+                                    @endif
                                 @endif
                             </tr>
                         </tbody>
@@ -419,8 +568,10 @@
                                     }
                                 @endphp
                                 <th>{{ round($saldomutasi1V_opc + $saldomutasi1V_ppc + $saldomutasi1V_mk, 4) }}</th>
-                                <th>{{ 'Rp ' . number_format($saldomutasi1H_opc + $saldomutasi1H_ppc + $saldomutasi1H_mk, 0, ',', '.') }}
-                                </th>
+                                @if (Auth::user()->role == '1')
+                                    <th>{{ 'Rp ' . number_format($saldomutasi1H_opc + $saldomutasi1H_ppc + $saldomutasi1H_mk, 0, ',', '.') }}
+                                    </th>
+                                @endif
                             </tr>
                         </tbody>
                     </table>

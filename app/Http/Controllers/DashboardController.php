@@ -4,6 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\LogOpc;
 use App\Models\Produksi;
+use App\Models\StockLogMasuk;
+use App\Models\StockLogMasukKeras;
+use App\Models\StockLogMk;
+use App\Models\StockLogOpc;
+use App\Models\StockLogPpc;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -13,6 +18,11 @@ class DashboardController extends Controller
      */
     public function index()
     {
+        // StockLogOpc::where('ket','masuk')->where('id','<=','37')->delete();
+        // StockLogPpc::where('ket','masuk')->where('id','<=','34')->delete();
+        // StockLogMk::where('ket','masuk')->where('id','<=','29')->delete();
+        // // StockLogMasukKeras::where('ket','keluar')->delete();
+        // LogOpc::where('status','L')->orwhere('status','proses')->update(['stat_sengon'=>null,'stat_keras'=>null,'status'=>null]);
 
         $startOfWeek = date("Y-m-d", strtotime("sunday last week"));
         $endOfWeek = date("Y-m-d", strtotime("saturday this week"));

@@ -15,16 +15,17 @@
 </head>
 <style>
     table.dataTable.cell-border thead th {
-        border: 1px solid rgba(0, 0, 0, 0.25);
+        border: 2px solid rgba(0, 0, 0, 0.5);
         text-align: center;
     }
 
     table.dataTable.cell-border tbody th,
     table.dataTable.cell-border tbody td {
-        border-top: 1px solid rgba(0, 0, 0, 0.15);
-        border-right: 1px solid rgba(0, 0, 0, 0.15);
-        border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+        border-top: 2px solid rgba(0, 0, 0, 0.3);
+        border-right: 2px solid rgba(0, 0, 0, 0.3);
+        border-bottom: 2px solid rgba(0, 0, 0, 0.3);
         padding: 5px 10px 5px 10px;
+        font-weight: bold;
     }
 
     table.dataTable.cell-border thead tr th {
@@ -33,7 +34,7 @@
 
     table.dataTable.cell-border tbody tr th:first-child,
     table.dataTable.cell-border tbody tr td:first-child {
-        border-left: 1px solid rgba(0, 0, 0, 0.15);
+        border-left: 2px solid rgba(0, 0, 0, 0.3);
     }
 
     .dataTable>thead>tr>th[class*="sort"]:before,
@@ -87,37 +88,84 @@
 
         <div class="row mb-3">
             <table id="datatable" class="dataTable cell-border w-100">
-                <thead>
-                    <tr>
-                        <th rowspan="2">No</th>
-                        <th colspan="5">Deskripsi</th>
-                        <th rowspan="2">Crate</th>
-                        <th rowspan="2">Pcs</th>
-                        <th rowspan="2">Vol(m3)</th>
-                        <th rowspan="2">Price/m3</th>
-                        <th rowspan="2">Total Price</th>
-                    </tr>
-                    <tr>
-                        <th>Grade</th>
-                        <th>Jenis Kayu</th>
-                        <th colspan="3">Size</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>{{ $item->grade }}</td>
-                        <td>{{ $item->jenis_kayu }}</td>
-                        <td>{{ $item->ukuran1 }}</td>
-                        <td>{{ $item->ukuran2 }}</td>
-                        <td>{{ $item->ukuran3 }}</td>
-                        <td>{{ $item->crate }}</td>
-                        <td>{{ $item->pcs }}</td>
-                        <td>{{ $item->vol_m3 }}</td>
-                        <td>{{ $item->harga_vol_m3 }}</td>
-                        <td>{{ $item->total_harga }}</td>
-                    </tr>
-                </tbody>
+                @if ($item->id_master == 1)
+                    <thead>
+                        <tr>
+                            <th rowspan="2">No</th>
+                            <th colspan="5">Deskripsi</th>
+                            <th rowspan="2">Crate</th>
+                            <th rowspan="2">Pcs</th>
+                            <th rowspan="2">Vol(m3)</th>
+                            <th rowspan="2">Price/m3</th>
+                            <th rowspan="2">Total Price</th>
+                        </tr>
+                        <tr>
+                            <th>Grade</th>
+                            <th>Jenis Kayu</th>
+                            <th colspan="3">Size</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>{{ $item->grade }}</td>
+                            <td>{{ $item->jenis_kayu }}</td>
+                            <td>{{ $item->ukuran1 }}</td>
+                            <td>{{ $item->ukuran2 }}</td>
+                            <td>{{ $item->ukuran3 }}</td>
+                            <td>{{ $item->crate }}</td>
+                            <td>{{ $item->pcs }}</td>
+                            <td>{{ $item->vol_m3 }}</td>
+                            <td>{{ 'Rp ' . number_format($item->harga_vol_m3, 0, ',', '.') }}</td>
+                            <td>{{ 'Rp ' . number_format($item->total_harga, 0, ',', '.') }}</td>
+                        </tr>
+                    </tbody>
+                @else
+                    <thead>
+                        <tr>
+                            <th rowspan="2">No</th>
+                            <th colspan="3">Deskripsi</th>
+                            {{-- <th rowspan="2">Crate</th> --}}
+                            <th rowspan="2">Vol(m3)</th>
+                            <th rowspan="2">Price/m3</th>
+                            <th rowspan="2">Total Price</th>
+                        </tr>
+                        <tr>
+                            <th>Grade</th>
+                            <th>Jenis Kayu</th>
+                            <th>Size</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php
+                            $no = 1;
+                            $arr_harga = [];
+                        @endphp
+                        @foreach ($penjualan as $pen)
+                            @php
+                                array_push($arr_harga, $pen->total_harga);
+                            @endphp
+                            <tr>
+                                <td>{{ $no++ }}</td>
+                                <td>{{ $pen->grade }}</td>
+                                <td>{{ $pen->jenis_kayu }}</td>
+                                <td>{{ $pen->ukuran1 }}</td>
+                                <td>{{ $pen->vol_m3 }}</td>
+                                <td>{{ 'Rp ' . number_format($pen->harga_vol_m3, 0, ',', '.') }}</td>
+                                <td>{{ 'Rp ' . number_format($pen->total_harga, 0, ',', '.') }}</td>
+                            </tr>
+                        @endforeach
+                        <tr>
+                            <th>Total</th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th>{{ 'Rp ' . number_format(array_sum($arr_harga), 0, ',', '.') }}</th>
+                        </tr>
+                    </tbody>
+                @endif
             </table>
         </div>
 
@@ -165,10 +213,6 @@
     $(document).ready(function() {
         $('#datatable').DataTable({
             dom: '<"table-responsive w-100"<t>>',
-            columnDefs: [{
-                render: $.fn.dataTable.render.number('.', ',', 0, 'Rp '),
-                targets: [9, 10]
-            }]
         });
     });
     $(document).ready(function() {

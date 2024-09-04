@@ -27,8 +27,14 @@ class ProduksiController extends Controller
      */
     public function index()
     {
-        $produksi=Produksi::get();
-        return view('produksi.list-produksi',compact('produksi'));
+        $produksi=Produksi::orderby('tanggal','desc')->get();
+        $produksiGroup=DB::select("SELECT tanggal,supplier,kode_produksi,log_opc,harga_log,
+                                sum(opc_m3) as sum_opc_m3,sum(opc_total) as sum_opc_total,sum(opcb_total) as sum_opcb_total,sum(ppc_total) as sum_ppc_total,sum(ampulur_total) as sum_ampulur_total,
+                                count(*) as count from produksi
+                                group by tanggal,supplier,kode_produksi,log_opc,harga_log order by tanggal desc");
+
+        // dd($produksiGroup);
+        return view('produksi.list-produksi',compact('produksi','produksiGroup'));
     }
 
     /**
@@ -37,9 +43,50 @@ class ProduksiController extends Controller
     public function create()
     {
         $masterproduk=HasilProduk::get();
-        $supplier=LogOpc::where('ket','beli')
+        $datasupplier=LogOpc::where('ket','beli')
             ->where('status',null)
+            ->orwhere('status','proses')
             ->get();
+        foreach($datasupplier as $ds){
+            $kode=$ds->kode;
+            $detail=DetailPembelian::where('kode_pembelian',$kode)
+            ->join('master_mentah','master_mentah.id','=','id_master_mentah')
+            ->select('detail_pembelian.*','master_mentah.jenis_muatan as jenis_muatan','jenis_kayu')
+            ->get();
+            $arrvolS=[];
+            $arrvolK=[];
+            foreach ($detail as $dp) {
+                if($dp->jenis_kayu=='sengon'){
+                    array_push($arrvolS,$dp->vol);
+                }
+                if($dp->jenis_kayu=='keras'){
+                    array_push($arrvolK,$dp->vol);
+                }
+            }
+            $sum_Vsengon=array_sum($arrvolS);
+            $sum_Vkeras=array_sum($arrvolK);
+            if(($ds->stat_sengon!=null || $ds->stat_keras!=null) && $ds->status==null){
+                $status='proses1';
+            }else if(($ds->stat_sengon!=null || $ds->stat_keras!=null) && $ds->status=='proses'){
+                $status='proses2';
+            }else{
+                $status=$ds->status;
+            }
+            $supplier[]=[
+                'id'=>$ds->id,
+                'kode'=>$ds->kode,
+                'supplier'=>$ds->supplier,
+                'uraian'=>$ds->uraian,
+                'harga'=>$ds->harga,
+                'sengon'=>$sum_Vsengon,
+                'stat_sengon'=>$ds->stat_sengon,
+                'harga_sengon'=>$ds->harga_sengon,
+                'keras'=>$sum_Vkeras,
+                'stat_keras'=>$ds->stat_keras,
+                'harga_keras'=>$ds->harga_keras,
+                'status'=>$status,
+            ];
+        };
         // dd($supplier);
         $temporary=Temporary::join('hasil_produksi','hasil_produksi.id','=','id_produk')->where('status',null)->select('temporary.*','hasil_produksi','satuan')->get();
         // dd($temporary);
@@ -76,14 +123,33 @@ class ProduksiController extends Controller
             $data_sup=LogOpc::where('id',$sup)->get();
             foreach($data_sup as $d_sup){
                 array_push($nama_sup,$d_sup->supplier);
-                array_push($jum_log,$d_sup->uraian);
-                array_push($harga_logopc,$d_sup->harga);
+                if($d_sup->sengon!=null && $d_sup->keras!=null){
+                    if($request->checkSengon=="on" && $request->checkKeras=="on"){
+                        $jenisKayu='campur';
+                    }else if($request->checkSengon=="on" ){
+                        $jenisKayu='sengon';
+                    }else if($request->checkKeras=="on" ){
+                        $jenisKayu='keras';
+                    }else{
+                        $jenisKayu='campur';
+                    }
+                }else{
+                    if($request->checkSengon=="on" && $request->checkKeras=="on"){
+                        $jenisKayu='campur';
+                    }else if($request->checkSengon=="on" ){
+                        $jenisKayu='sengon';
+                    }else if($request->checkKeras=="on" ){
+                        $jenisKayu='keras';
+                    }
+                }
             }
         }
+        // dd();
         $sup_id=implode(",",$request_supplier);
         $sup_nama=implode(", ",$nama_sup);
-        $jumlah_log=array_sum($jum_log);
-        $harga_log=array_sum($harga_logopc);
+        // salah
+        $jumlah_log=$request->log_kubik;
+        $harga_log=$request->log_harga;
 
         $request_tanggal=$request->tanggal;
         $newDate = date("Y-m-d", strtotime($request_tanggal));
@@ -106,13 +172,14 @@ class ProduksiController extends Controller
             $kode='PRO'.$kode_bulan.$no_urut;
             // dump(substr($ck->kode_produksi,-3));
         }
-        // dd($kode);
+        // dd($request);
         $data=[
             'kode_produksi'=>$kode,
             'tanggal'=>$newDate,
             'id_supplier'=>$sup_id,
             'supplier'=>$sup_nama,
             'log_opc'=>$jumlah_log,
+            'jenis_kayu'=>$jenisKayu,
             'harga_log'=>$harga_log,
             'id_produk'=>$request->produk,
             'pcs'=>$pcs,
@@ -124,10 +191,43 @@ class ProduksiController extends Controller
             'total'=>$total_harga,
         ];
 
+        // cek log
+        // dd($request);
+
+
+        // dd($dataLog);
+        DB::beginTransaction();
         try{
             Temporary::create($data);
+            $ceklog=LogOpc::whereIn('id',$request_supplier)->get();
+            foreach ($ceklog as $cl){
+                    if($request->checkSengon=="on" && $cl->stat_sengon!='L'){
+                        $dataLog=[
+                            'stat_sengon'=>'P',
+                        ];
+                        LogOpc::where('id',$cl->id)->update($dataLog);
+                    } if($request->checkKeras=="on" && $cl->stat_keras!='L'){
+                        // dd($cl->stat_keras);
+                        $dataLog=[
+                            'stat_keras'=>'P',
+                        ];
+                        LogOpc::where('id',$cl->id)->update($dataLog);
+                    }
+
+                    // selain sengon dan keras
+                    if($cl->sengon==0 && $cl->keras==0){
+                        $dataLog=[
+                            'stat_sengon'=>'P',
+                            'stat_keras'=>'P',
+                        ];
+                        LogOpc::where('id',$cl->id)->update($dataLog);
+                    }
+            }
+
+            DB::commit();
             return redirect()->route('produksi.add');
         }catch(Exception $e){
+            DB::rollBack();
             dd($e);
             return redirect()->route('produksi.add');
         }
@@ -167,6 +267,7 @@ class ProduksiController extends Controller
                     'supplier'=>$opc->supplier,
                     'persentase'=>$persentase,
                     'log_opc'=>$opc->log_opc,
+                    'jenis_kayu'=>$opc->jenis_kayu,
                     'harga_log'=>$opc->harga_log,
                     'opc_pcs'=>$opc->pcs,
                     'opc_m3'=>$opc->ukuran,
@@ -234,14 +335,14 @@ class ProduksiController extends Controller
             // UNTUK STOCK KELUAR BARANG MENTAH
             $carilogopc=LogOpc::whereIn('id',$idSup)->get();
             foreach($carilogopc as $clopc){
+
                 $caristockMasuk=StockLogMasuk::where('kode',$clopc->kode)->get();
                 $caristockMasukKeras=StockLogMasukKeras::where('kode',$clopc->kode)->get();
-                $caristockMasukSengon260=StockLogMasukSengon260::where('kode',$clopc->kode)->get();
-                $caristockMasukKeras260=StockLogMasukKeras260::where('kode',$clopc->kode)->get();
-
-                if(count($caristockMasuk)!=0){
+                // dd($caristockMasukKeras);
+                if(count($caristockMasuk)!=0 && $clopc->stat_sengon=='P'){
                     foreach($caristockMasuk as $csMasuk){}
-                    $dataStockLogMasuk=[
+                    if($csMasuk->status==null){
+                        $dataStockLogMasuk=[
                         'kode'=>$opc->kode_produksi,
                         'tanggal'=>$opc->tanggal,
                         'supplier'=>$clopc->supplier,
@@ -250,43 +351,35 @@ class ProduksiController extends Controller
                         'ket'=>'keluar',
                     ];
                     StockLogMasuk::create($dataStockLogMasuk);
+                    StockLogMasuk::where('kode',$clopc->kode)->update(['status'=>$opc->kode_produksi]);
+
+                    LogOpc::where('id',$clopc->id)->update(['stat_sengon'=>'L']);
+
+                    }
                 }
-                if(count($caristockMasukKeras)!=0){
+                if(count($caristockMasukKeras)!=0 && $clopc->stat_keras=='P'){
                     foreach($caristockMasukKeras as $csMasukKeras){}
-                    $dataStockLogMasukKeras=[
-                        'kode'=>$opc->kode_produksi,
-                        'tanggal'=>$opc->tanggal,
-                        'supplier'=>$clopc->supplier,
-                        'volume'=>$csMasukKeras->volume,
-                        'harga'=>$csMasukKeras->harga,
-                        'ket'=>'keluar',
-                    ];
-                    StockLogMasukKeras::create($dataStockLogMasukKeras);
+                    if($csMasukKeras->status==null){
+                        $dataStockLogMasukKeras=[
+                            'kode'=>$opc->kode_produksi,
+                            'tanggal'=>$opc->tanggal,
+                            'supplier'=>$clopc->supplier,
+                            'volume'=>$csMasukKeras->volume,
+                            'harga'=>$csMasukKeras->harga,
+                            'ket'=>'keluar',
+                        ];
+                        StockLogMasukKeras::create($dataStockLogMasukKeras);
+                        StockLogMasukKeras::where('kode',$clopc->kode)->update(['status'=>$opc->kode_produksi]);
+                        // dd($clopc->id);
+                        LogOpc::where('id',$clopc->id)->update(['stat_keras'=>'L']);
+                    }
                 }
-                if(count($caristockMasukSengon260)!=0){
-                    foreach($caristockMasukSengon260 as $csMasukSengon260){}
-                    $dataStockLogMasukSengon260=[
-                        'kode'=>$opc->kode_produksi,
-                        'tanggal'=>$opc->tanggal,
-                        'supplier'=>$clopc->supplier,
-                        'volume'=>$csMasukSengon260->volume,
-                        'harga'=>$csMasukSengon260->harga,
-                        'ket'=>'keluar',
-                    ];
-                    StockLogMasukSengon260::create($dataStockLogMasukSengon260);
+
+                // selain sengon dan keras
+                if(($clopc->sengon==0 && $clopc->stat_sengon=='P')&&($clopc->keras==0 && $clopc->stat_keras=='P') ){
+                    LogOpc::where('id',$clopc->id)->update(['stat_sengon'=>'L','stat_keras'=>'L']);
                 }
-                if(count($caristockMasukKeras260)!=0){
-                    foreach($caristockMasukKeras260 as $csMasukKeras260){}
-                    $dataStockLogMasukKeras260=[
-                        'kode'=>$opc->kode_produksi,
-                        'tanggal'=>$opc->tanggal,
-                        'supplier'=>$clopc->supplier,
-                        'volume'=>$csMasukKeras260->volume,
-                        'harga'=>$csMasukKeras260->harga,
-                        'ket'=>'keluar',
-                    ];
-                    StockLogMasukKeras260::create($dataStockLogMasukKeras260);
-                }
+
             }
             StockLogOpc::create($dataStockOpc);
 
@@ -295,7 +388,26 @@ class ProduksiController extends Controller
             // END STOCK
             Produksi::insert($dataOPC);
             Temporary::whereIn('id',$idTempOpc)->update(['status'=>'move']);
-            LogOpc::whereIn('id',$idSup)->update(['status'=>'L']);
+            // ceklog
+            $cekStatLog=LogOpc::whereIn('id',$idSup)->get();
+            foreach($cekStatLog as $csl){
+                if($csl->stat_sengon=='L' && $csl->stat_keras=='L'){
+                    LogOpc::where('id',$csl->id)->update(['status'=>'L']);
+                }else if(($csl->stat_sengon!='L' && $csl->sengon==0)&&$csl->stat_keras=='L'){
+                    LogOpc::where('id',$csl->id)->update(['status'=>'L']);
+                }else if(($csl->stat_keras!='L' && $csl->keras==0)&&$csl->stat_sengon=='L'){
+                    LogOpc::where('id',$csl->id)->update(['status'=>'L']);
+                }else if(($csl->stat_sengon!='L' && $csl->sengon!=0)&&$csl->stat_keras=='L'){
+                    LogOpc::where('id',$csl->id)->update(['status'=>'proses']);
+                }else if(($csl->stat_keras!='L' && $csl->keras!=0)&&$csl->stat_sengon=='L'){
+                    LogOpc::where('id',$csl->id)->update(['status'=>'proses']);
+                }else{
+                    LogOpc::where('id',$csl->id)->update(['status'=>'proses']);
+                }
+            }
+
+
+            // LogOpc::whereIn('id',$idSup)->update(['status'=>'L']);
             // DB::commit();
             $dataProduksi=Produksi::where('tanggal',$opc->tanggal)
                 ->where('id_supplier',$opc->id_supplier)
@@ -381,7 +493,7 @@ class ProduksiController extends Controller
             return redirect("/produksi")->with('success','Data berhasil ditambahkan!');
         }catch(Exception $e){
             DB::rollback();
-            dd($e);
+            // dd($e);
             return redirect("/produksi")->with('failed','Data gagal ditambahkan!');
         }
     }
@@ -425,6 +537,7 @@ class ProduksiController extends Controller
     }
 
     public function temporary_perkode(Request $request,$kode){
+        // iki edit submit
         $produk_id=$request->produk;
         $produk=HasilProduk::where('id',$produk_id)->get();
         foreach ($produk as $p) {}
@@ -451,6 +564,7 @@ class ProduksiController extends Controller
             $pcs='';
         }
         $produksi=Produksi::where('kode_produksi',$kode)->get();
+        // dd($produksi);
         foreach($produksi as $pro){}
         $data=[
             'kode_produksi'=>$kode,
@@ -459,6 +573,7 @@ class ProduksiController extends Controller
             'supplier'=>$pro->supplier,
             'log_opc'=>$pro->log_opc,
             'harga_log'=>$pro->harga_log,
+            'jenis_kayu'=>$pro->jenis_kayu,
             'id_produk'=>$request->produk,
             'pcs'=>$pcs,
             'ukuran'=>$ukuran,
@@ -468,7 +583,7 @@ class ProduksiController extends Controller
             'harga'=>$p->harga,
             'total'=>$total_harga,
         ];
-
+        // dd($data);
         DB::beginTransaction();
         try{
             Temporary::create($data);
@@ -538,6 +653,7 @@ class ProduksiController extends Controller
                     'persentase'=>$persentase,
                     'log_opc'=>$opc->log_opc,
                     'harga_log'=>$opc->harga_log,
+                    'jenis_kayu'=>$opc->jenis_kayu,
                     'opc_pcs'=>$opc->pcs,
                     'opc_m3'=>$opc->ukuran,
                     'opc_harga'=>$opc->harga,
@@ -779,15 +895,86 @@ class ProduksiController extends Controller
     {
         $kode=$id;
         $produksi=Produksi::where('kode_produksi',$kode)->get();
-        foreach($produksi as $p){}
+
+        foreach($produksi as $p){
+        }
         $id_supplier=$p->id_supplier;
         $idSup=explode(",",$id_supplier);
+        $jenis_kayu=$p->jenis_kayu;
         // dump($idSup);
+        // dd($kode);
+        $data=[
+            'stat_sengon'=>null,
+            'stat_keras'=>null
+        ];
         DB::beginTransaction();
         try{
+            // cek kayu
+            $kode_beli=[];
+            $log=LogOpc::whereIn('id',$idSup)->get();
+            foreach($log as $l){
+                array_push($kode_beli,$l->kode);
+                if($l->sengon==0 && $l->keras==0){
+                    $idlog=$l->id;
+                    LogOpc::where('id',$idlog)->update(['stat_sengon'=>null,'stat_keras'=>null,'status'=>null]);
+                }
+            }
+            $cariSSk=StockLogMasuk::where('status',$kode)->get();
+            $cariSKk=StockLogMasukKeras::where('status',$kode)->get();
+// dump($cariSSk);
+            foreach($cariSSk as $cssk){
+
+
+                LogOpc::where('kode',$cssk->kode)->update(['stat_sengon'=>null]);
+                $iniLognya=LogOpc::where('kode',$cssk->kode)->get();
+                foreach($iniLognya as $lognya){}
+                // dump(LogOpc::where('kode',$cssk->kode)->get());
+                // dump($lognya->stat_sengon,$lognya->stat_keras);
+                // if($cssk->stat_sengon==null && $cssk->stat_keras==null){
+                if(($lognya->stat_sengon && $lognya->stat_keras)==null){
+                    LogOpc::where('kode',$cssk->kode)->update(['status'=>null]);
+                    // dump(LogOpc::where('kode',$cssk->kode)->get());
+                }
+                if(($lognya->stat_sengon=='L' && $lognya->stat_keras==null)||($lognya->stat_sengon==null&&$lognya->stat_keras=='L')){
+                    LogOpc::where('kode',$cssk->kode)->update(['status'=>'proses']);
+                    // dump(LogOpc::where('kode',$cssk->kode)->get());
+                }
+                // dump(LogOpc::where('kode',$cssk->kode)->get());
+                StockLogMasuk::where('kode',$cssk->kode)->update(['status'=>null]);
+                StockLogMasuk::where('kode',$kode)->delete();
+            }
+            foreach($cariSKk as $cskk){
+                //  dump(LogOpc::where('kode',$cssk->kode)->get());
+                LogOpc::where('kode',$cskk->kode)->update(['stat_keras'=>null]);
+                $iniLoglagi=LogOpc::where('kode',$cskk->kode)->get();
+                foreach($iniLoglagi as $loglagi){}
+                if($loglagi->stat_sengon==null && $loglagi->stat_keras==null){
+                    LogOpc::where('kode',$cskk->kode)->update(['status'=>null]);
+
+                }
+                if(($loglagi->stat_sengon=='L'&&$loglagi->stat_keras==null)||($loglagi->stat_sengon==null&&$loglagi->stat_keras=='L')){
+                    LogOpc::where('kode',$cskk->kode)->update(['status'=>'proses']);
+                }
+                // dump(LogOpc::where('kode',$cskk->kode)->get());
+                StockLogMasukKeras::where('kode',$cskk->kode)->update(['status'=>null]);
+                StockLogMasukKeras::where('kode',$kode)->delete();
+            }
+
+            // dd('mati');
+
+
+
+
+            StockLogOpc::where('kode',$kode)->delete();
+            StockLogPpc::where('kode',$kode)->delete();
+            StockLogMk::where('kode',$kode)->delete();
+
+
+
+
             Temporary::where('kode_produksi',$kode)->delete();
             Produksi::where('kode_produksi',$kode)->delete();
-            LogOpc::whereIn('id',$idSup)->update(['status'=>null]);
+
             DB::commit();
             return redirect("/produksi")->with('success','Data berhasil dihapus!');
         }catch(Exception $e){
@@ -801,10 +988,34 @@ class ProduksiController extends Controller
     public function destroy_temporary(string $id)
     {
         $de_id=Crypt::decrypt($id);//id temporary
+
+        $temp=Temporary::where('id',$de_id)->get();
+        foreach($temp as $t){}
+        $id_supplier=$t->id_supplier;
+        $idSup=explode(",",$id_supplier);
+        $jenis_kayu=$t->jenis_kayu;
+        $kode=$t->kode_produksi;
+        // $data=[
+        //     'stat_sengon'=>null,
+        //     'stat_keras'=>null
+        // ];
         DB::beginTransaction();
         try{
             Temporary::where('id',$de_id)->delete();
+            $tempNull=Temporary::where('kode_produksi',$kode)->get();
+            // dd(count($tempNull),$jenis_kayu);
+            if(count($tempNull)==0){
+                if($jenis_kayu=='campur'){
+                    LogOpc::whereIn('id',$idSup)->where('stat_sengon','P')->update(['stat_sengon'=>null]);
+                    LogOpc::whereIn('id',$idSup)->where('stat_keras','P')->update(['stat_keras'=>null]);
+                }if(($jenis_kayu=='sengon')){
+                    LogOpc::whereIn('id',$idSup)->update(['stat_sengon'=>null]);
+                }if(($jenis_kayu=='keras')){
+                    LogOpc::whereIn('id',$idSup)->update(['stat_keras'=>null]);
+                }
+            }
             DB::commit();
+
             $masterproduk=HasilProduk::get();
             $supplier=LogOpc::where('ket','beli')
                 ->where('status',null)
@@ -824,9 +1035,28 @@ class ProduksiController extends Controller
     public function destroy_temporary_perkode($id,$kode)
     {
         $de_id=Crypt::decrypt($id);//id temporary
+        $temp=Temporary::where('kode_prodeuksi',$kode)->get();
+        foreach($temp as $t){}
+        $id_supplier=$t->id_supplier;
+        $idSup=explode(",",$id_supplier);
+        $jenis_kayu=$t->jenis_kayu;
+        $data=[
+            'stat_sengon'=>null,
+            'stat_keras'=>null
+        ];
         DB::beginTransaction();
         try{
             Temporary::where('id',$de_id)->delete();
+            $tempNull=Temporary::where('kode_prodeuksi',$kode)->get();
+            if(count($tempNull)==0){
+                if($jenis_kayu=='campur'){
+                    LogOpc::whereIn('id',$idSup)->update($data);
+                }if(($jenis_kayu=='sengon')){
+                    LogOpc::whereIn('id',$idSup)->update(['stat_sengon'=>null]);
+                }if(($jenis_kayu=='keras')){
+                    LogOpc::whereIn('id',$idSup)->update(['stat_keras'=>null]);
+                }
+            }
             DB::commit();
 
             return redirect('produksi-edit-perkode/'.$kode);

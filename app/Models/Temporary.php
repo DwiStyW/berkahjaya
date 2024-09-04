@@ -15,6 +15,7 @@ class Temporary extends Model
         'id_supplier',
         'supplier',
         'log_opc',
+        'jenis_kayu',
         'harga_log',
         'id_produk',
         'pcs',

@@ -16,5 +16,6 @@ class DetailMasterMentah extends Model
         'pakem',
         'pakem_pembulatan',
         'harga',
+        'harga_khusus',
     ];
 }

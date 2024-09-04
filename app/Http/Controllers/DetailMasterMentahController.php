@@ -78,6 +78,18 @@ class DetailMasterMentahController extends Controller
         return view('detail-master-mentah.edit-detail-master-mentah',compact('detailmastermentah','id_master','mastermentah'));
     }
 
+     public function edit_perkelas($id,$kelas)
+    {
+        // dd($id,$kode);
+        if($kelas=='null'){
+            $kls=null;
+        }else{
+            $kls=$kelas;
+        }
+        $detailmastermentah=DetailMasterMentah::where('id_master_mentah',$id)->where('kelas_model',$kls)->get();
+        // dd($detailmastermentah);
+        return view('detail-master-mentah.edit-detail-master-mentah-permodel',compact('detailmastermentah','id','kelas'));
+    }
     /**
      * Update the specified resource in storage.
      */
@@ -91,11 +103,35 @@ class DetailMasterMentahController extends Controller
                 'pakem'=>$request->pakem,
                 'pakem_pembulatan'=>$request->pakem_pembulatan,
                 'harga'=>$request->harga,
+                'harga_khusus'=>$request->harga_khusus,
             ];
-        // dd($id);
+        // dd($data);
         $en_id=Crypt::encrypt($request->id_master);
         try{
             DetailMasterMentah::where('id',$de_id)->update($data);
+            return redirect("/detailmastermentah/".$en_id)->with('success','Data berhasil diedit!');
+        }catch(Exception $e){
+            dd($e);
+            return redirect("/detailmastermentah/".$en_id)->with('failed','Data gagal diedit!');
+        }
+    }
+    public function update_perkelas(Request $request, $id,$kelas)
+    {
+
+        $data=[
+                'harga'=>$request->harga,
+                'harga_khusus'=>$request->harga_khusus,
+            ];
+        // dd($id,$kelas);
+        if($kelas=='null'){
+            $kls=null;
+        }else{
+            $kls=$kelas;
+        }
+
+        $en_id=Crypt::encrypt($id);
+        try{
+            DetailMasterMentah::where('id_master_mentah',$id)->where('kelas_model',$kls)->update($data);
             return redirect("/detailmastermentah/".$en_id)->with('success','Data berhasil diedit!');
         }catch(Exception $e){
             dd($e);

@@ -71,6 +71,12 @@
                             <span>Master Barang Jadi</span>
                         </a>
                     </li> --}}
+                    <li>
+                        <a href="{{ url('/supplier') }}">
+                            <i class="uil-users-alt"></i>
+                            <span>Supplier</span>
+                        </a>
+                    </li>
                 @endif
                 <li>
                     <a href="{{ url('/produksi') }}">
@@ -90,6 +96,12 @@
                         <a href="{{ url('/penjualan') }}">
                             <i class="uil-folder-upload"></i>
                             <span>Barang Keluar</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url('/operasional') }}">
+                            <i class="uil-setting"></i>
+                            <span>Operasional</span>
                         </a>
                     </li>
                 @endif
@@ -123,8 +135,10 @@
                     </a>
                     <ul class="sub-menu" aria-expanded="false">
                         {{-- <li><a href="/stockbaku">Stock</a></li> --}}
-                        <li><a href="/stockmasuk">Stock Log Masuk</a></li>
-                        <li><a href="/stockmasukkeras">Stock Log Masuk Keras</a></li>
+                        <li><a href="/stockmasuk">Log Masuk Sengon</a></li>
+                        {{-- <li><a href="/stocksengon260">Log Masuk Sengon 260</a></li> --}}
+                        <li><a href="/stockmasukkeras">Log Masuk Keras</a></li>
+                        {{-- <li><a href="/stockkeras260">Log Masuk Keras 260</a></li> --}}
                         {{-- <li><a href="/stockmasukkeras">Stock Log Masuk Sengon</a></li> --}}
                     </ul>
                 </li>
@@ -139,6 +153,14 @@
                         <li><a href="/stockmk">Stock MK</a></li>
                     </ul>
                 </li>
+                @if (Auth::user()->role == '1')
+                    <li>
+                        <a href="{{ url('/laporan') }}">
+                            <i class="uil-file-landscape"></i>
+                            <span>Laporan</span>
+                        </a>
+                    </li>
+                @endif
             </ul>
         </div>
         <!-- Sidebar -->

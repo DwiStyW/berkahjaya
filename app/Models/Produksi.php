@@ -16,6 +16,7 @@ class Produksi extends Model
         'supplier',
         'persentase',
         'log_opc',
+        'jenis_kayu',
         'harga_log',
         'opc_pcs',
         'opc_m3',
