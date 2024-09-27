@@ -14,7 +14,7 @@ class OperasionalController extends Controller
      */
     public function index()
     {
-        $operasional=Operasional::get();
+        $operasional=Operasional::orderby('id','desc')->get();
         return view('operasional.list-operasional',compact('operasional'));
     }
 

@@ -46,7 +46,25 @@
                                             value="{{ $item->uraian }}">
                                     </div>
                                 </div>
-
+                                <div class="mb-3 row">
+                                    <label for="hasil_produksi" class="col-md-2 col-form-label">Kategori</label>
+                                    <div class="col-md-10">
+                                        <select class="form-control" type="text" id="kategori" name="kategori">
+                                            <option disabled selected>Pilih Kategori</option>
+                                            <option value="SOLAR">SOLAR</option>
+                                            <option value="BENSIN">BENSIN</option>
+                                            <option value="KANTOR">KANTOR</option>
+                                            <option value="MESIN">MESIN</option>
+                                            <option value="SERVICE">SERVICE</option>
+                                            <option value="KONSUMSI">KONSUMSI</option>
+                                            <option value="ONGKOS TRUK KIRIM">ONGKOS TRUK KIRIM</option>
+                                            <option value="BONGKAR & MUAT">BONGKAR & MUAT</option>
+                                            <option value="MAKAN SUPIR">MAKAN SUPIR</option>
+                                            <option value="GAJI">GAJI</option>
+                                            <option value="LAIN-LAIN">LAIN-LAIN</option>
+                                        </select>
+                                    </div>
+                                </div>
                                 <div class="mb-3 row">
                                     <label for="hasil_produksi" class="col-md-2 col-form-label">Total</label>
                                     <div class="col-md-10">
@@ -81,5 +99,8 @@
             let dateFormat1 = moment(tanggal).format('DD MMM, yyyy');
             document.getElementById('tanggal').value = dateFormat1;
         }
+        var kat = @json($item->kategori);
+        document.getElementById('kategori').value = kat;
+        console.log(kat);
     </script>
 @endsection

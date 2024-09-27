@@ -45,15 +45,30 @@ class PembelianController extends Controller
             ->select('detail_pembelian.*','master_mentah.jenis_muatan as jenis_muatan','detail_master_mentah.kelas_model as kelas_model','detail_master_mentah.model as model',
             'detail_master_mentah.pakem as pakem','detail_master_mentah.pakem_pembulatan as pakem_pembulatan')
             ->get();
-        // dd($detail_pembelian);
+        // $detail_pembelian_g=DB::select('SELECT count(*),kode_pembelian,tanggal,supplier,sum(jumlah) as jumlah,sum(vol) as vol,sum(total_harga) as total_harga,detail_pembelian.id_master_mentah,id_model,detail_pembelian.harga_model,detail_pembelian.status,
+        //     master_mentah.jenis_muatan,detail_master_mentah.kelas_model,detail_master_mentah.model,detail_master_mentah.pakem,detail_master_mentah.pakem_pembulatan
+        //     From detail_pembelian
+        //     join master_mentah on id_master_mentah=master_mentah.id
+        //     join detail_master_mentah on id_model=detail_master_mentah.id
+        //     where kode_pembelian is null
+        //     group by kode_pembelian,tanggal,supplier,detail_pembelian.id_master_mentah,id_model,detail_pembelian.status,detail_pembelian.harga_model,
+        //     master_mentah.jenis_muatan,detail_master_mentah.kelas_model,detail_master_mentah.model,detail_master_mentah.pakem,detail_master_mentah.pakem_pembulatan
+        //     ');
+        // dd($detail_pembelian_g);
         $detail_pembelian_group=DetailPembelian::where('kode_pembelian',null)
             ->join('master_mentah','id_master_mentah','=','master_mentah.id')
             ->groupby('id_master_mentah','jenis_muatan')
             ->select('id_master_mentah','jenis_muatan')
             ->get();
+
+        $detail_pembelian_group_truk=DetailPembelian::where('kode_pembelian',null)
+            ->join('master_mentah','id_master_mentah','=','master_mentah.id')
+            ->groupby('no_truk')
+            ->select('no_truk')
+            ->get();
             // dd($detail_pembelian_group);
         $supplier=Supplier::get();
-        return view('pembelian.add-pembelian',compact('mastermentah','detail_pembelian','detail_pembelian_group','supplier'));
+        return view('pembelian.add-pembelian',compact('mastermentah','detail_pembelian','detail_pembelian_group','detail_pembelian_group_truk','supplier'));
     }
 
     public function getModel(Request $request){
@@ -128,14 +143,23 @@ class PembelianController extends Controller
         // dd($data_truk);
         $arr_vol=[];
         $arr_total=[];
+
         $arr_Vsuper=[];
         $arr_Vsengon260=[];
         $arr_Vkeras260=[];
         $arr_Vkeras=[];
+        $arr_Vlog100=[];
+        $arr_Vlog130=[];
+        $arr_Vkalimantan=[];
+
         $arr_Hsuper=[];
         $arr_Hsengon260=[];
         $arr_Hkeras260=[];
         $arr_Hkeras=[];
+        $arr_Hlog100=[];
+        $arr_Hlog130=[];
+        $arr_Hkalimantan=[];
+
         $arr_notruk=[];
         foreach($data_detail_pembelian as $ddp){
             array_push($arr_vol,$ddp->vol);
@@ -153,6 +177,15 @@ class PembelianController extends Controller
             }else if($ddp->id_master_mentah=='4'){
                 array_push($arr_Vkeras,$ddp->vol);
                 array_push($arr_Hkeras,$ddp->total_harga);
+            }else if($ddp->id_master_mentah=='5'){
+                array_push($arr_Vlog100,$ddp->vol);
+                array_push($arr_Hlog100,$ddp->total_harga);
+            }else if($ddp->id_master_mentah=='6'){
+                array_push($arr_Vlog130,$ddp->vol);
+                array_push($arr_Hlog130,$ddp->total_harga);
+            }else if($ddp->id_master_mentah=='7'){
+                array_push($arr_Vkalimantan,$ddp->vol);
+                array_push($arr_Hkalimantan,$ddp->total_harga);
             }
         }
 
@@ -161,14 +194,22 @@ class PembelianController extends Controller
         }
         $sum_vol=array_sum($arr_vol);
         $sum_total=array_sum($arr_total);
+
         $sum_Vsuper=array_sum($arr_Vsuper);
         $sum_Vsengon260=array_sum($arr_Vsengon260);
         $sum_Vkeras260=array_sum($arr_Vkeras260);
         $sum_Vkeras=array_sum($arr_Vkeras);
+        $sum_Vlog100=array_sum($arr_Vlog100);
+        $sum_Vlog130=array_sum($arr_Vlog130);
+        $sum_Vkalimantan=array_sum($arr_Vkalimantan);
+
         $sum_Hsuper=array_sum($arr_Hsuper);
         $sum_Hsengon260=array_sum($arr_Hsengon260);
         $sum_Hkeras260=array_sum($arr_Hkeras260);
         $sum_Hkeras=array_sum($arr_Hkeras);
+        $sum_Hlog100=array_sum($arr_Hlog100);
+        $sum_Hlog130=array_sum($arr_Hlog130);
+        $sum_Hkalimantan=array_sum($arr_Hkalimantan);
 
         $no_truk=implode(",",$arr_notruk);
         $total_truk=count($arr_notruk);
@@ -205,8 +246,8 @@ class PembelianController extends Controller
                 'tanggal'=>$request_tanggal,
                 'supplier'=>$ddp->supplier,
                 'uraian'=>$sum_vol,
-                'sengon'=>$sum_Vsuper+$sum_Vsengon260,
-                'harga_sengon'=>$sum_Hsuper+$sum_Hsengon260,
+                'sengon'=>$sum_Vsuper+$sum_Vsengon260+$sum_Vlog100+$sum_Vlog130+$sum_Vkalimantan,
+                'harga_sengon'=>$sum_Hsuper+$sum_Hsengon260+$sum_Hlog100+$sum_Hlog130+$sum_Hkalimantan,
                 'keras'=>$sum_Vkeras260+$sum_Vkeras,
                 'harga_keras'=>$sum_Hkeras260+$sum_Hkeras,
                 'harga'=>$sum_total,
@@ -217,8 +258,8 @@ class PembelianController extends Controller
                 'kode'=>$kode,
                 'tanggal'=>$request_tanggal,
                 'supplier'=>$ddp->supplier,
-                'volume'=>$sum_Vsuper+$sum_Vsengon260,
-                'harga'=>$sum_Hsuper+$sum_Hsengon260,
+                'volume'=>$sum_Vsuper+$sum_Vsengon260+$sum_Vlog100+$sum_Vlog130+$sum_Vkalimantan,
+                'harga'=>$sum_Hsuper+$sum_Hsengon260+$sum_Hlog100+$sum_Hlog130+$sum_Hkalimantan,
                 'ket'=>'masuk',
             ];
 
@@ -236,7 +277,7 @@ class PembelianController extends Controller
         try{
             Pembelian::create($dataPembelian);
             LogOpc::create($dataLog);
-            if($sum_Vsuper+$sum_Vsengon260!=0){
+            if($sum_Vsuper+$sum_Vsengon260+$sum_Vlog100+$sum_Vlog130+$sum_Vkalimantan!=0){
                     StockLogMasuk::create($dataStockLogMasuk);
                 }
                 if($sum_Vkeras260+$sum_Vkeras!=0){
@@ -321,16 +362,27 @@ class PembelianController extends Controller
             // dd($data_detail_pembelian);
             $arr_vol=[];
             $arr_total=[];
+
             $arr_Vsuper=[];
             $arr_Vsengon260=[];
             $arr_Vkeras260=[];
             $arr_Vkeras=[];
+            $arr_Vlog100=[];
+            $arr_Vlog130=[];
+            $arr_Vkalimantan=[];
+
             $arr_Hsuper=[];
             $arr_Hsengon260=[];
             $arr_Hkeras260=[];
             $arr_Hkeras=[];
+            $arr_Hlog100=[];
+            $arr_Hlog130=[];
+            $arr_Hkalimantan=[];
+
+            $arr_notruk=[];
             foreach($data_detail_pembelian as $ddp){
                 array_push($arr_vol,$ddp->vol);
+                //
                 array_push($arr_total,$ddp->total_harga);
                 if($ddp->id_master_mentah=='1'){
                     array_push($arr_Vsuper,$ddp->vol);
@@ -344,19 +396,43 @@ class PembelianController extends Controller
                 }else if($ddp->id_master_mentah=='4'){
                     array_push($arr_Vkeras,$ddp->vol);
                     array_push($arr_Hkeras,$ddp->total_harga);
+                }else if($ddp->id_master_mentah=='5'){
+                    array_push($arr_Vlog100,$ddp->vol);
+                    array_push($arr_Hlog100,$ddp->total_harga);
+                }else if($ddp->id_master_mentah=='6'){
+                    array_push($arr_Vlog130,$ddp->vol);
+                    array_push($arr_Hlog130,$ddp->total_harga);
+                }else if($ddp->id_master_mentah=='7'){
+                    array_push($arr_Vkalimantan,$ddp->vol);
+                    array_push($arr_Hkalimantan,$ddp->total_harga);
                 }
             }
             $sum_vol=array_sum($arr_vol);
             $sum_total=array_sum($arr_total);
+
             $sum_Vsuper=array_sum($arr_Vsuper);
             $sum_Vsengon260=array_sum($arr_Vsengon260);
             $sum_Vkeras260=array_sum($arr_Vkeras260);
             $sum_Vkeras=array_sum($arr_Vkeras);
+            $sum_Vlog100=array_sum($arr_Vlog100);
+            $sum_Vlog130=array_sum($arr_Vlog130);
+            $sum_Vkalimantan=array_sum($arr_Vkalimantan);
+
             $sum_Hsuper=array_sum($arr_Hsuper);
             $sum_Hsengon260=array_sum($arr_Hsengon260);
             $sum_Hkeras260=array_sum($arr_Hkeras260);
             $sum_Hkeras=array_sum($arr_Hkeras);
+            $sum_Hlog100=array_sum($arr_Hlog100);
+            $sum_Hlog130=array_sum($arr_Hlog130);
+            $sum_Hkalimantan=array_sum($arr_Hkalimantan);
 
+            $data_truk=DetailPembelian::where('kode_pembelian',null)->whereNotNull('no_truk')->groupby('no_truk')->select('no_truk')->get();
+
+            foreach($data_truk as $dt){
+            array_push($arr_notruk,$dt->no_truk);
+        }
+                    $no_truk=implode(",",$arr_notruk);
+        $total_truk=count($arr_notruk);
             // dd($sum_Vsuper,$sum_Vsengon260,$sum_Vkeras260,$sum_Vkeras);
             // $request_tanggal=$ddp->tanggal;
             $newDate = date("Y-m-d", strtotime($tanggal));
@@ -379,16 +455,18 @@ class PembelianController extends Controller
                 'kode_pembelian'=>$kode,
                 'tanggal'=>$newDate,
                 'supplier'=>$supplier,
+                'jumlah_truk'=>$total_truk,
+                'no_truk'=>$no_truk,
                 'vol'=>$sum_vol,
                 'total_harga'=>$sum_total,
             ];
             $dataLog=[
                 'kode'=>$kode,
                 'tanggal'=>$newDate,
-                'supplier'=>$supplier,
+                'supplier'=>$ddp->supplier,
                 'uraian'=>$sum_vol,
-                'sengon'=>$sum_Vsuper+$sum_Vsengon260,
-                'harga_sengon'=>$sum_Hsuper+$sum_Hsengon260,
+                'sengon'=>$sum_Vsuper+$sum_Vsengon260+$sum_Vlog100+$sum_Vlog130+$sum_Vkalimantan,
+                'harga_sengon'=>$sum_Hsuper+$sum_Hsengon260+$sum_Hlog100+$sum_Hlog130+$sum_Hkalimantan,
                 'keras'=>$sum_Vkeras260+$sum_Vkeras,
                 'harga_keras'=>$sum_Hkeras260+$sum_Hkeras,
                 'harga'=>$sum_total,
@@ -398,16 +476,16 @@ class PembelianController extends Controller
             $dataStockLogMasuk=[
                 'kode'=>$kode,
                 'tanggal'=>$newDate,
-                'supplier'=>$supplier,
-                'volume'=>$sum_Vsuper+$sum_Vsengon260,
-                'harga'=>$sum_Hsuper+$sum_Hsengon260,
+                'supplier'=>$ddp->supplier,
+                'volume'=>$sum_Vsuper+$sum_Vsengon260+$sum_Vlog100+$sum_Vlog130+$sum_Vkalimantan,
+                'harga'=>$sum_Hsuper+$sum_Hsengon260+$sum_Hlog100+$sum_Hlog130+$sum_Hkalimantan,
                 'ket'=>'masuk',
             ];
 
             $dataStockLogMasukKeras=[
                 'kode'=>$kode,
                 'tanggal'=>$newDate,
-                'supplier'=>$supplier,
+                'supplier'=>$ddp->supplier,
                 'volume'=>$sum_Vkeras260+$sum_Vkeras,
                 'harga'=>$sum_Hkeras260+$sum_Hkeras,
                 'ket'=>'masuk',
@@ -423,7 +501,7 @@ class PembelianController extends Controller
             try{
                 Pembelian::create($dataPembelian);
                 LogOpc::create($dataLog);
-                if($sum_Vsuper+$sum_Vsengon260!=0){
+                if($sum_Vsuper+$sum_Vsengon260+$sum_Vlog100+$sum_Vlog130+$sum_Vkalimantan!=0){
                     StockLogMasuk::create($dataStockLogMasuk);
                 }
                 if($sum_Vkeras260+$sum_Vkeras!=0){
@@ -506,10 +584,9 @@ class PembelianController extends Controller
 
     }
 
-
-
     public function detail_pembelian($kode){
         $kodePembelian=Crypt::decrypt($kode);
+        $pembelian=Pembelian::where('kode_pembelian',$kodePembelian)->get();
         $detail_pembelian=DetailPembelian::where('kode_pembelian',$kodePembelian)
             ->join('master_mentah','id_master_mentah','=','master_mentah.id')
             ->join('detail_master_mentah','id_model','=','detail_master_mentah.id')
@@ -517,18 +594,29 @@ class PembelianController extends Controller
             ->select('detail_pembelian.*','master_mentah.jenis_muatan as jenis_muatan','detail_master_mentah.kelas_model as kelas_model','detail_master_mentah.model as model',
             'detail_master_mentah.pakem as pakem','detail_master_mentah.pakem_pembulatan as pakem_pembulatan')
             ->get();
-        // dd($detail_pembelian);
+        // dd($pembelian);
         $detail_pembelian_group=DetailPembelian::where('kode_pembelian',$kodePembelian)
             ->join('master_mentah','id_master_mentah','=','master_mentah.id')
             ->groupby('id_master_mentah','jenis_muatan')
             ->select('id_master_mentah','jenis_muatan')
             ->get();
+
+        $detail_pembelian_g=DB::select("SELECT count(*),kode_pembelian,tanggal,supplier,sum(jumlah) as jumlah,sum(vol) as vol,sum(total_harga) as total_harga,detail_pembelian.id_master_mentah,id_model,detail_pembelian.harga_model,detail_pembelian.status,
+            master_mentah.jenis_muatan,detail_master_mentah.kelas_model,detail_master_mentah.model,detail_master_mentah.pakem,detail_master_mentah.pakem_pembulatan
+            From detail_pembelian
+            join master_mentah on id_master_mentah=master_mentah.id
+            join detail_master_mentah on id_model=detail_master_mentah.id
+            where kode_pembelian ='$kodePembelian'
+            group by kode_pembelian,tanggal,supplier,detail_pembelian.id_master_mentah,id_model,detail_pembelian.status,detail_pembelian.harga_model,
+            master_mentah.jenis_muatan,detail_master_mentah.kelas_model,detail_master_mentah.model,detail_master_mentah.pakem,detail_master_mentah.pakem_pembulatan
+            ");
         // $detail_pembelian=DetailPembelian::where('kode_pembelian',$kodePembelian)->get();
-        return view('pembelian.detail_pembelian',compact('detail_pembelian','detail_pembelian_group','kode'));
+        return view('pembelian.detail_pembelian',compact('detail_pembelian','detail_pembelian_group','kode','pembelian'));
         // dd($detail_pembelian);
     }
     public function printPembelian($kode){
         $kodePembelian=Crypt::decrypt($kode);
+        $pembelian=Pembelian::where('kode_pembelian',$kodePembelian)->get();
         $detail_pembelian=DetailPembelian::where('kode_pembelian',$kodePembelian)
             ->join('master_mentah','id_master_mentah','=','master_mentah.id')
             ->join('detail_master_mentah','id_model','=','detail_master_mentah.id')
@@ -539,8 +627,7 @@ class PembelianController extends Controller
         // dd($detail_pembelian);
         foreach($detail_pembelian as $dp){}
         $supplier=$dp->supplier;
-        $reg=Supplier::where('supplier','like','%'.$supplier.'%')
-            ->orwhere('nama','like','%'.$supplier.'%')
+        $reg=Supplier::where('supplier',$supplier)
             ->get();
         // dd($rek);
         $detail_pembelian_group=DetailPembelian::where('kode_pembelian',$kodePembelian)
@@ -550,7 +637,7 @@ class PembelianController extends Controller
             ->get();
 
         // $detail_pembelian=DetailPembelian::where('kode_pembelian',$kodePembelian)->get();
-        return view('pembelian.print_pembelian',compact('detail_pembelian','detail_pembelian_group','kode','reg'));
+        return view('pembelian.print_pembelian',compact('detail_pembelian','detail_pembelian_group','kode','reg','pembelian'));
         // dd($detail_pembelian);
     }
 
@@ -584,6 +671,7 @@ class PembelianController extends Controller
                     'kode_pembelian'=>$kode,
                     'tanggal'=>$newDate,
                     'supplier'=>$request->supplier,
+                    'no_truk'=>$request->no_truk,
                     'id_master_mentah'=>$request->id_master_mentah,
                     'id_model'=>$request->$rq_model,
                     'jumlah'=>$request->$rq_jumlah,

@@ -129,6 +129,14 @@
                                         {{-- <td>{{ 'Rp ' . number_format($total_beliHarga, 0, ',', '.') }}</td> --}}
                                     </tr>
                                     <tr>
+                                        <td></td>
+                                        <td>{{ $jumlah_truk }} Truk</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td>{{ 'Rp ' . number_format($harga_truk, 0, ',', '.') }}</td>
+                                    </tr>
+                                    <tr>
                                         <td class="text-white">&sum;</td>
                                         <td></td>
                                         <td></td>
@@ -165,7 +173,14 @@
                                     <tr>
                                         <td></td>
                                         <td style="background-color: rgb(255, 77, 77)">
-                                            {{ round((($total_jualOpcVol + $total_soVol) / $total_proVol) * 100) }} %</td>
+
+                                            @if ($total_proVol == 0)
+                                                {{ '0 %' }}
+                                            @else
+                                                {{ round((($total_jualOpcVol + $total_soVol) / $total_proVol) * 100) }} %
+                                            @endif
+
+                                        </td>
                                         {{-- <td style="background-color: rgb(255, 77, 77)">
                                             {{ round((($total_jualOpcVol + $total_soVol) / $total_beliVol) * 100) }} %</td> --}}
                                         {{-- <td>{{ $total_proVol }}</td> --}}
@@ -176,7 +191,7 @@
                                             {{ 'Rp ' . number_format($total_jualOpcHarga + $total_soHarga, 0, ',', '.') }}
                                         </td>
                                         <td style="background-color: rgb(47, 234, 0)">
-                                            {{ 'Rp ' . number_format($total_jualOpcHarga + $total_soHarga - $total_proHarga, 0, ',', '.') }}
+                                            {{ 'Rp ' . number_format($total_jualOpcHarga + $total_soHarga - ($total_proHarga + $harga_truk), 0, ',', '.') }}
                                             {{-- {{ 'Rp ' . number_format($total_jualOpcHarga + $total_soHarga - $total_beliHarga, 0, ',', '.') }} --}}
                                         </td>
                                     </tr>
@@ -191,7 +206,8 @@
                                     <tr style="background-color: rgb(47, 234, 0)">
                                         <td></td>
                                         <td>Stock Log</td>
-                                        <td>{{ $total_slVol }}</td>
+                                        <td>
+                                            {{ round($total_slVol, 4) }}</td>
                                         <td></td>
                                         <td></td>
                                         <td>{{ 'Rp ' . number_format($total_slHarga, 0, ',', '.') }}</td>
@@ -249,6 +265,15 @@
                                             <td></td>
                                         </tr>
                                     @endforeach
+                                    @foreach ($operasional_kat as $op_kat)
+                                        <tr>
+                                            <td>{{ $loop->index + 1 }}</td>
+                                            <td>{{ $op_kat->kategori }}</td>
+                                            <td></td>
+                                            <td>{{ 'Rp ' . number_format($op_kat->harga, 0, ',', '.') }}</td>
+                                            <td></td>
+                                        </tr>
+                                    @endforeach
                                     <tr>
                                         <td>{{ date('d M Y', strtotime($newDateAkhir)) }}</td>
                                         <td>Stock Ppc</td>
@@ -277,9 +302,10 @@
                                             {{ 'Rp ' . number_format($total_jualLimbahHarga, 0, ',', '.') }}
                                         </td>
                                         <td style="background-color: rgb(160, 234, 0)">
-                                            {{ 'Rp ' . number_format($total_operasional, 0, ',', '.') }}</td>
+                                            {{ 'Rp ' . number_format($total_operasional + $total_operasional_kat, 0, ',', '.') }}
+                                        </td>
                                         <td style="background-color: rgb(160, 234, 0)">
-                                            {{ 'Rp ' . number_format($total_jualLimbahHarga - $total_operasional, 0, ',', '.') }}
+                                            {{ 'Rp ' . number_format($total_jualLimbahHarga - ($total_operasional + $total_operasional_kat), 0, ',', '.') }}
                                         </td>
                                     </tr>
                                     <tr>
@@ -297,7 +323,7 @@
                                         </td>
                                         <td style="background-color: rgb(47, 234, 0)"></td>
                                         <td style="background-color: rgb(47, 234, 0)">
-                                            {{ 'Rp ' . number_format($total_jualLimbahHarga + $total_spHarga + $total_smHarga - $total_operasional, 0, ',', '.') }}
+                                            {{ 'Rp ' . number_format($total_jualLimbahHarga + $total_spHarga + $total_smHarga - ($total_operasional + $total_operasional_kat), 0, ',', '.') }}
                                         </td>
                                     </tr>
                                     <tr>

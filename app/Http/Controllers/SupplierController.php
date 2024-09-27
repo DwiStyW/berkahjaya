@@ -11,7 +11,7 @@ class SupplierController extends Controller
 {
     public function index()
     {
-        $supplier=Supplier::get();
+        $supplier=Supplier::orderby('id','desc')->get();
         return view('supplier.list-supplier',compact('supplier'));
     }
 

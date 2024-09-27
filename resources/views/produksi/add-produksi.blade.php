@@ -51,8 +51,12 @@
                                 <select class="form-control select2 select2-multiple" multiple="multiple"
                                     id="supplier_field" data-placeholder="Pilih Supplier" onchange="find_log()">
                                     @foreach ($supplier as $sup)
-                                        <option value="{{ $sup['id'] }}">id={{ $sup['id'] }} {{ $sup['supplier'] }}
-                                            {{ $sup['uraian'] }}
+                                        <option value="{{ $sup['id'] }}">{{ $sup['id'] }} {{ $sup['supplier'] }}
+                                            @if ($sup['sengon'] != 0 && $sup['keras'] != 0)
+                                                {{ $sup['sengon'] + $sup['keras'] }}
+                                            @else
+                                                {{ $sup['uraian'] }}
+                                            @endif
                                             @if ($sup['status'] == null || $sup['status'] == 'proses')
                                                 @if ($sup['sengon'] != 0 && $sup['stat_sengon'] != 'L')
                                                     &emsp; Sengon->{{ $sup['sengon'] }}
@@ -80,8 +84,12 @@
                                 <select class="form-control select2 select2-multiple" multiple="multiple" name="supplier[]"
                                     id="supplier" data-placeholder="Pilih Supplier" onchange="find_log()">
                                     @foreach ($supplier as $sup)
-                                        <option value="{{ $sup['id'] }}">id={{ $sup['id'] }} {{ $sup['supplier'] }}
-                                            {{ $sup['uraian'] }}
+                                        <option value="{{ $sup['id'] }}">{{ $sup['id'] }} {{ $sup['supplier'] }}
+                                            @if ($sup['sengon'] != 0 && $sup['keras'] != 0)
+                                                {{ $sup['sengon'] + $sup['keras'] }}
+                                            @else
+                                                {{ $sup['uraian'] }}
+                                            @endif
                                             @if ($sup['status'] == null || $sup['status'] == 'proses')
                                                 @if ($sup['sengon'] != 0 && $sup['stat_sengon'] != 'L')
                                                     &emsp; Sengon->{{ $sup['sengon'] }}
@@ -317,13 +325,15 @@
                 console.log(log);
                 // statusfind.push(log.status);
                 if (log.status == null || log.status == 'proses1') {
-                    if (log.stat_keras == null && log.stat_sengon == null) {
-                        logfind.push(Number(log.uraian));
-                        hargafind.push(Number(log.harga));
+                    if ((log.keras != 0 && log.sengon != 0) && (log.stat_keras == null && log.stat_sengon == null)) {
+                        logfind.push(Number(log.sengon) + Number(log.keras));
+                        hargafind.push(Number(log.harga_sengon) + Number(log.harga_keras));
+
                     } else if ((log.stat_keras == 'L' && log.stat_sengon == null) || (log.stat_keras == 'P' && log
                             .stat_sengon == null)) {
                         logfind.push(Number(log.keras));
                         hargafind.push(Number(log.harga_keras));
+                        // console.log('sini');
                     } else if ((log.stat_sengon == 'L' && log.stat_keras == null) || (log.stat_sengon == 'P' && log
                             .stat_keras == null)) {
                         logfind.push(Number(log.sengon));

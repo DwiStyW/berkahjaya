@@ -214,7 +214,11 @@
                                             @if ($item->kode_produksi == $pg->kode_produksi)
                                                 @if ($pg->count == 1)
                                                     <tr style="border-bottom: 4px solid rgba(0, 0, 0, 0.15)">
-                                                        <td>{{ date('d-M', strtotime($item->tanggal)) }}</td>
+                                                        <td>
+                                                            <span
+                                                                style="display: none">{{ strtotime($item->tanggal) }}</span>
+                                                            {{ date('d-M', strtotime($item->tanggal)) }}
+                                                        </td>
                                                         <td @if ($item->harga_log > $item->opc_total) class="bg-danger" @endif>
                                                             {{ $item->supplier }}<span
                                                                 class="d-none">{{ $item->kode_produksi }}</span>
@@ -265,7 +269,11 @@
                                                     </tr>
                                                 @else
                                                     <tr>
-                                                        <td>{{ date('d-M', strtotime($item->tanggal)) }}</td>
+                                                        <td>
+                                                            <span
+                                                                style="display: none">{{ strtotime($item->tanggal) }}</span>
+                                                            {{ date('d-M', strtotime($item->tanggal)) }}
+                                                        </td>
                                                         <td @if ($item->harga_log > $pg->sum_opc_total) class="bg-danger" @endif>
                                                             {{ $item->supplier }}<span
                                                                 class="d-none">{{ $item->kode_produksi }}</span>
@@ -313,7 +321,11 @@
                                                         <td></td>
                                                     </tr>
                                                     <tr style="border-bottom: 4px solid rgba(0, 0, 0, 0.15)">
-                                                        <td>{{ date('d-M', strtotime($item->tanggal)) }}</td>
+                                                        <td>
+                                                            <span
+                                                                style="display: none">{{ strtotime($item->tanggal) }}</span>
+                                                            {{ date('d-M', strtotime($item->tanggal)) }}
+                                                        </td>
                                                         <td @if ($item->harga_log > $pg->sum_opc_total) class="bg-danger" @endif>
                                                             {{ $item->supplier }}<span
                                                                 class="d-none">{{ $item->kode_produksi }}</span>

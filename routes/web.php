@@ -148,6 +148,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/stockopc', [StockController::class, 'stock_opc'])->name('stockopc');
     Route::get('/stockppc', [StockController::class, 'stock_ppc'])->name('stockppc');
     Route::get('/stockmk', [StockController::class, 'stock_mk'])->name('stockmk');
+    Route::get('/stockampulur', [StockController::class, 'stock_ampulur'])->name('stockmk');
     Route::post('/getStock', [StockController::class, 'getStock'])->name('getStock');
 
 });

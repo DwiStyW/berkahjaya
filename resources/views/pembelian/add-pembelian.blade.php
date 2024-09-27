@@ -35,9 +35,9 @@
         }
 
         /* table.dataTable.cell-border tbody tr:first-child th,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    table.dataTable.cell-border tbody tr:first-child td {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        border-top: none;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    } */
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        table.dataTable.cell-border tbody tr:first-child td {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            border-top: none;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        } */
     </style>
 @endsection
 @section('content')
@@ -159,90 +159,186 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
+                        <div class="mb-3">
+                            @if (count($detail_pembelian) != 0)
+                                <div class="d-flex">
+                                    <button class="btn btn-sm btn-primary me-2" onclick="tabelJenis()">Berdasarkan
+                                        Jenis</button>
+                                    <button class="btn btn-sm btn-primary me-2" onclick="tabelTruk()">Berdasarkan
+                                        Truk</button>
+                                </div>
+                            @endif
+                        </div>
                         @foreach ($detail_pembelian as $dp)
                         @endforeach
                         @if (count($detail_pembelian) != 0)
                             <h6 class="text-secondary mb-1">{{ $dp->tanggal }} {{ $dp->supplier }}</h6>
                         @endif
+                        <div id="tabel_jenis" style="display:block">
+                            @foreach ($detail_pembelian_group as $i)
+                                <h6 class="text-secondary">{{ $i->jenis_muatan }}</h6>
+                                <div class="mb-3">
+                                    <table id="datatable{{ $i->id_master_mentah }}"
+                                        class="dataTable cell-border table-bordered dt-responsive nowrap border-secondary"
+                                        style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                        <thead class="bg-soft-secondary text-dark">
+                                            <tr>
+                                                <th>Model</th>
+                                                <th></th>
+                                                <th>Pakem</th>
+                                                <th>Jumlah</th>
+                                                <th>Volume</th>
+                                                <th>Harga</th>
+                                                <th>Rupiah</th>
+                                                <th>Aksi</th>
+                                            </tr>
 
-                        @foreach ($detail_pembelian_group as $i)
-                            <h6 class="text-secondary">{{ $i->jenis_muatan }}</h6>
-                            <div class="mb-3">
-                                <table id="datatable{{ $i->id_master_mentah }}"
-                                    class="dataTable cell-border table-bordered dt-responsive nowrap border-secondary"
-                                    style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                                    <thead class="bg-soft-secondary text-dark">
-                                        <tr>
-                                            <th>Model</th>
-                                            <th></th>
-                                            <th>Pakem</th>
-                                            <th>Jumlah</th>
-                                            <th>Volume</th>
-                                            <th>Harga</th>
-                                            <th>Rupiah</th>
-                                            <th>Aksi</th>
-                                        </tr>
+                                        </thead>
 
-                                    </thead>
+                                        <tbody>
+                                            @php
+                                                $jumlah = [];
+                                                $volume = [];
+                                                $rupiah = [];
+                                            @endphp
+                                            @foreach ($detail_pembelian as $item)
+                                                @if ($i->id_master_mentah == $item->id_master_mentah)
+                                                    @php
+                                                        array_push($jumlah, $item->jumlah);
+                                                        array_push($volume, $item->vol);
+                                                        array_push($rupiah, $item->total_harga);
+                                                    @endphp
+                                                    <tr>
 
-                                    <tbody>
-                                        @php
-                                            $jumlah = [];
-                                            $volume = [];
-                                            $rupiah = [];
-                                        @endphp
-                                        @foreach ($detail_pembelian as $item)
-                                            @if ($i->id_master_mentah == $item->id_master_mentah)
-                                                @php
-                                                    array_push($jumlah, $item->jumlah);
-                                                    array_push($volume, $item->vol);
-                                                    array_push($rupiah, $item->total_harga);
-                                                @endphp
-                                                <tr>
+                                                        <td>
+                                                            @if ($item->status != 'afkir')
+                                                                {{ $item->kelas_model }}
+                                                            @else
+                                                                {{ $item->status }}
+                                                            @endif
+                                                        </td>
+                                                        <td>{{ $item->model }}</td>
+                                                        <td>{{ $item->pakem_pembulatan }}</td>
+                                                        <td>{{ $item->jumlah }}</td>
+                                                        <td>{{ $item->vol }}</td>
+                                                        <td>{{ $item->harga_model }}</td>
+                                                        <td>{{ $item->total_harga }}</td>
+                                                        <td>
+                                                            <ul class="list-inline mb-0">
+                                                                <li class="list-inline-item">
+                                                                    <a onclick="hapus('{{ Crypt::encrypt($item->id) }}')"
+                                                                        data-bs-toggle="modal"
+                                                                        data-bs-target="#hapusmodal"
+                                                                        class="px-2 text-danger">
+                                                                        <i class="uil uil-trash-alt font-size-18"></i>
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </td>
+                                                    </tr>
+                                                @endif
+                                            @endforeach
+                                        </tbody>
+                                        <tbody class="bg-light">
+                                            <tr>
+                                                <th>Total</th>
+                                                <th></th>
+                                                <th></th>
+                                                <th>{{ array_sum($jumlah) }}</th>
+                                                <th>{{ array_sum($volume) }}</th>
+                                                <th></th>
+                                                <th>{{ 'Rp ' . number_format(array_sum($rupiah), 0, ',', '.') }}</th>
+                                                <th></th>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endforeach
+                        </div>
+                        <div id="tabel_truk" style="display:none">
+                            @foreach ($detail_pembelian_group_truk as $t)
+                                {{-- {{ $loop->index + 1 }} --}}
+                                <h6 class="text-secondary"><b>No Truk </b>: {{ $t->no_truk }}</h6>
+                                <div class="mb-3">
+                                    <table id="datatable{{ $loop->index + 8 }}"
+                                        class="dataTable cell-border table-bordered dt-responsive nowrap border-secondary"
+                                        style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                        <thead class="bg-soft-secondary text-dark">
+                                            <tr>
+                                                <th>Jenis</th>
+                                                <th>Model</th>
+                                                <th></th>
+                                                <th>Pakem</th>
+                                                <th>Jumlah</th>
+                                                <th>Volume</th>
+                                                <th>Harga</th>
+                                                <th>Rupiah</th>
+                                                <th>Aksi</th>
+                                            </tr>
 
-                                                    <td>
-                                                        @if ($item->status != 'afkir')
-                                                            {{ $item->kelas_model }}
-                                                        @else
-                                                            {{ $item->status }}
-                                                        @endif
-                                                    </td>
-                                                    <td>{{ $item->model }}</td>
-                                                    <td>{{ $item->pakem_pembulatan }}</td>
-                                                    <td>{{ $item->jumlah }}</td>
-                                                    <td>{{ $item->vol }}</td>
-                                                    <td>{{ $item->harga_model }}</td>
-                                                    <td>{{ $item->total_harga }}</td>
-                                                    <td>
-                                                        <ul class="list-inline mb-0">
-                                                            <li class="list-inline-item">
-                                                                <a onclick="hapus('{{ Crypt::encrypt($item->id) }}')"
-                                                                    data-bs-toggle="modal" data-bs-target="#hapusmodal"
-                                                                    class="px-2 text-danger">
-                                                                    <i class="uil uil-trash-alt font-size-18"></i>
-                                                                </a>
-                                                            </li>
-                                                        </ul>
-                                                    </td>
-                                                </tr>
-                                            @endif
-                                        @endforeach
-                                    </tbody>
-                                    <tbody class="bg-light">
-                                        <tr>
-                                            <th>Total</th>
-                                            <th></th>
-                                            <th></th>
-                                            <th>{{ array_sum($jumlah) }}</th>
-                                            <th>{{ array_sum($volume) }}</th>
-                                            <th></th>
-                                            <th>{{ 'Rp ' . number_format(array_sum($rupiah), 0, ',', '.') }}</th>
-                                            <th></th>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        @endforeach
+                                        </thead>
+
+                                        <tbody>
+                                            @php
+                                                $jumlah = [];
+                                                $volume = [];
+                                                $rupiah = [];
+                                            @endphp
+                                            @foreach ($detail_pembelian as $item)
+                                                @if ($t->no_truk == $item->no_truk)
+                                                    @php
+                                                        array_push($jumlah, $item->jumlah);
+                                                        array_push($volume, $item->vol);
+                                                        array_push($rupiah, $item->total_harga);
+                                                    @endphp
+                                                    <tr>
+                                                        <td>{{ $item->jenis_muatan }}</td>
+                                                        <td>
+                                                            @if ($item->status != 'afkir')
+                                                                {{ $item->kelas_model }}
+                                                            @else
+                                                                {{ $item->status }}
+                                                            @endif
+                                                        </td>
+                                                        <td>{{ $item->model }}</td>
+                                                        <td>{{ $item->pakem_pembulatan }}</td>
+                                                        <td>{{ $item->jumlah }}</td>
+                                                        <td>{{ $item->vol }}</td>
+                                                        <td>{{ $item->harga_model }}</td>
+                                                        <td>{{ $item->total_harga }}</td>
+                                                        <td>
+                                                            <ul class="list-inline mb-0">
+                                                                <li class="list-inline-item">
+                                                                    <a onclick="hapus('{{ Crypt::encrypt($item->id) }}')"
+                                                                        data-bs-toggle="modal"
+                                                                        data-bs-target="#hapusmodal"
+                                                                        class="px-2 text-danger">
+                                                                        <i class="uil uil-trash-alt font-size-18"></i>
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </td>
+                                                    </tr>
+                                                @endif
+                                            @endforeach
+                                        </tbody>
+                                        <tbody class="bg-light">
+                                            <tr>
+                                                <th>Total</th>
+                                                <th></th>
+                                                <th></th>
+                                                <th></th>
+                                                <th>{{ array_sum($jumlah) }}</th>
+                                                <th>{{ array_sum($volume) }}</th>
+                                                <th></th>
+                                                <th>{{ 'Rp ' . number_format(array_sum($rupiah), 0, ',', '.') }}</th>
+                                                <th></th>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endforeach
+                        </div>
                         <table class="dataTable cell-border table-bordered border-light w-100">
                             <thead>
                                 <tr class="bg-light">
@@ -401,6 +497,76 @@
                 columnDefs: [{
                     render: $.fn.dataTable.render.number('.', ',', 0, 'Rp '),
                     targets: [5, 6]
+                }]
+            });
+        });
+        $(document).ready(function() {
+            $('#datatable7').DataTable({
+                dom: '<"table-responsive w-100"<t>>',
+                order: [
+                    [0, 'desc']
+                ],
+                rowsGroup: [0],
+                paging: false,
+                columnDefs: [{
+                    render: $.fn.dataTable.render.number('.', ',', 0, 'Rp '),
+                    targets: [5, 6]
+                }]
+            });
+        });
+        $(document).ready(function() {
+            $('#datatable8').DataTable({
+                dom: '<"table-responsive w-100"<t>>',
+                order: [
+                    [0, 'desc']
+                ],
+                rowsGroup: [0, 1],
+                paging: false,
+                columnDefs: [{
+                    render: $.fn.dataTable.render.number('.', ',', 0, 'Rp '),
+                    targets: [6, 7]
+                }]
+            });
+        });
+        $(document).ready(function() {
+            $('#datatable9').DataTable({
+                dom: '<"table-responsive w-100"<t>>',
+                order: [
+                    [0, 'desc']
+                ],
+                rowsGroup: [0, 1],
+                paging: false,
+                columnDefs: [{
+                    render: $.fn.dataTable.render.number('.', ',', 0, 'Rp '),
+                    targets: [6, 7]
+                }]
+            });
+        });
+        $(document).ready(function() {
+            $('#datatable10').DataTable({
+                dom: '<"table-responsive w-100"<t>>',
+                order: [
+                    [0, 'desc']
+                ],
+                rowsGroup: [0, 1],
+                paging: false,
+                columnDefs: [{
+                    render: $.fn.dataTable.render.number('.', ',', 0, 'Rp '),
+                    targets: [6, 7]
+                }]
+            });
+        });
+        $(document).ready(function() {
+            $('#datatable11').DataTable({
+                dom: '<"table-responsive w-100"<t>>',
+                order: [
+                    [0, 'desc']
+                ],
+                rowsGroup: [0, 1],
+                paging: false,
+                columnDefs: [{
+                    render: $.fn.dataTable.render.number('.', ',', 0, 'Rp '),
+                    targets: [6, 7]
                 }]
             });
         });
@@ -737,6 +903,16 @@
                 document.getElementById('harga_rupiah' + n).value = rp(harga);
             }
             hitung(n)
+        }
+
+        function tabelJenis() {
+            document.getElementById('tabel_truk').style.display = 'none';
+            document.getElementById('tabel_jenis').style.display = 'block';
+        }
+
+        function tabelTruk() {
+            document.getElementById('tabel_truk').style.display = 'block';
+            document.getElementById('tabel_jenis').style.display = 'none';
         }
     </script>
 @endsection

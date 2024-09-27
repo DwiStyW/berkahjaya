@@ -86,7 +86,11 @@
                                 @foreach ($produksi as $item)
                                     @if ($pg->kode_produksi == $item->kode_produksi)
                                         <tr>
-                                            <td>{{ date('d-M, Y', strtotime($item->tanggal)) }}</td>
+                                            <td>
+                                                <span style="display: none">{{ strtotime($item->tanggal) }}</span>
+                                                {{ date('d-M, Y', strtotime($item->tanggal)) }}
+                                            </td>
+                                            {{-- <td>{{ date('d-M, Y', strtotime($item->tanggal)) }}</td> --}}
                                             @if ($pg->count == 1)
                                                 <td @if ($item->harga_log > $item->opc_total) class="bg-danger" @endif>
                                                     {{ $item->supplier }}<span

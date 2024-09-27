@@ -145,7 +145,7 @@
                                     <tr>
                                         <th>Grade</th>
                                         <th>Jenis Kayu</th>
-                                        <th>Size</th>
+                                        <th>Jumlah</th>
                                     </tr>
                                 </thead>
                                 <tbody>

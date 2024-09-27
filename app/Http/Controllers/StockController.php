@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\StockLogAmpulur;
 use App\Models\StockLogMasuk;
 use App\Models\StockLogMasukKeras;
 use App\Models\StockLogMasukKeras260;
@@ -22,8 +23,9 @@ class StockController extends Controller
         $stockopc=StockLogOpc::orderby('tanggal','asc')->orderby('ket','desc')->get();
         $stockppc=StockLogPpc::orderby('tanggal','asc')->orderby('ket','desc')->get();
         $stockmk=StockLogMk::orderby('tanggal','asc')->orderby('ket','desc')->get();
+        $stockampulur=StockLogAmpulur::orderby('tanggal','asc')->orderby('ket','desc')->get();
         // dd($logmasuk);
-        return view('stock.list-stock-baku-global',compact('logmasuk','logmasukkeras','logsengon260','logkeras260','stockopc','stockppc','stockmk'));
+        return view('stock.list-stock-baku-global',compact('logmasuk','logmasukkeras','logsengon260','logkeras260','stockopc','stockppc','stockmk','stockampulur'));
     }
     public function stock_masuk(){
         // $stock=StockLogMasuk::orderby('tanggal','asc')->get();
@@ -158,6 +160,10 @@ class StockController extends Controller
         $stock=StockLogMk::orderby('tanggal','asc')->orderby('ket','desc')->get();
         return view('stock.list-stock-jadi-mk',compact('stock'));
     }
+    public function stock_ampulur(){
+        $stock=StockLogAmpulur::orderby('tanggal','asc')->orderby('ket','desc')->get();
+        return view('stock.list-stock-jadi-ampulur',compact('stock'));
+    }
 
     public function getStock(Request $request){
         if($request->id==1){
@@ -166,6 +172,10 @@ class StockController extends Controller
             $stock=StockLogPpc::get();
         }else if($request->id==4){
             $stock=StockLogMk::get();
+        }else if($request->id==5){
+            $stock=StockLogAmpulur::get();
+        }else{
+            $stock=[];
         }
         return $stock;
     }

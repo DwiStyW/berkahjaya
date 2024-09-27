@@ -74,6 +74,16 @@
                                     </div>
                                 </div>
                             </div>
+                            @foreach ($pembelian as $p)
+                                @if ($p->jumlah_truk != 0)
+                                    <div>
+                                        <h6 class="text-secondary mb-1">Jumlah Truk&emsp;:&emsp;{{ $p->jumlah_truk }}
+                                        </h6>
+                                        <h6 class="text-secondary mb-1">No Truk &emsp;&emsp;&emsp;:&emsp;{{ $p->no_truk }}
+                                        </h6>
+                                    </div>
+                                @endif
+                            @endforeach
                         @endif
 
                         @foreach ($detail_pembelian_group as $i)
@@ -285,6 +295,34 @@
         });
         $(document).ready(function() {
             $('#datatable6').DataTable({
+                dom: '<"table-responsive w-100"<t>>',
+                order: [
+                    [0, 'desc']
+                ],
+                rowsGroup: [0],
+                paging: false,
+                columnDefs: [{
+                    render: $.fn.dataTable.render.number('.', ',', 0, 'Rp '),
+                    targets: [5, 6]
+                }]
+            });
+        });
+        $(document).ready(function() {
+            $('#datatable7').DataTable({
+                dom: '<"table-responsive w-100"<t>>',
+                order: [
+                    [0, 'desc']
+                ],
+                rowsGroup: [0],
+                paging: false,
+                columnDefs: [{
+                    render: $.fn.dataTable.render.number('.', ',', 0, 'Rp '),
+                    targets: [5, 6]
+                }]
+            });
+        });
+        $(document).ready(function() {
+            $('#datatable8').DataTable({
                 dom: '<"table-responsive w-100"<t>>',
                 order: [
                     [0, 'desc']

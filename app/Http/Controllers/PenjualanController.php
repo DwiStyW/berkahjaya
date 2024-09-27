@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\HasilProduk;
 use App\Models\LogOpc;
 use App\Models\Penjualan;
+use App\Models\StockLogAmpulur;
 use App\Models\StockLogMk;
 use App\Models\StockLogOpc;
 use App\Models\StockLogPpc;
@@ -20,7 +21,7 @@ class PenjualanController extends Controller
      */
     public function index()
     {
-        $penjualan=Penjualan::get();
+        $penjualan=Penjualan::orderby('id','desc')->get();
         return view('penjualan.list-penjualan',compact('penjualan'));
     }
 
@@ -29,7 +30,7 @@ class PenjualanController extends Controller
      */
     public function create()
     {
-        $mateng=HasilProduk::whereIn('id',[1,3,4])->get();
+        $mateng=HasilProduk::get();
         return view('penjualan.add-penjualan',compact('mateng'));
     }
 
@@ -58,39 +59,56 @@ class PenjualanController extends Controller
         $master=HasilProduk::where('id',$request->grade)->get();
         foreach($master as $m){}
         // dd($master);
-        if($request->grade==1){
-            $dataPenjualan=[
-                'kode_penjualan'=>$kode,
-                'tanggal'=>$newDate,
-                'supplier'=>$request->supplier,
-                'alamat'=>$request->alamat,
-                'id_master'=>$request->grade,
-                'grade'=>$m->hasil_produksi,
-                'jenis_kayu'=>$request->jenis_kayu,
-                'ukuran1'=>$request->ukuran1,
-                'ukuran2'=>$request->ukuran2,
-                'ukuran3'=>$request->ukuran3,
-                'pcs'=>$request->pcs,
-                'crate'=>$request->crate,
-                'vol_m3'=>$request->vol,
-                'harga_vol_m3'=>$harga,
-                'total_harga'=>$total_harga,
-            ];
+        if(count($master)!=0){
+            if($request->grade==1){
+                $dataPenjualan=[
+                    'kode_penjualan'=>$kode,
+                    'tanggal'=>$newDate,
+                    'supplier'=>$request->supplier,
+                    'alamat'=>$request->alamat,
+                    'id_master'=>$request->grade,
+                    'grade'=>$m->hasil_produksi,
+                    'jenis_kayu'=>$request->jenis_kayu,
+                    'ukuran1'=>$request->ukuran1,
+                    'ukuran2'=>$request->ukuran2,
+                    'ukuran3'=>$request->ukuran3,
+                    'pcs'=>$request->pcs,
+                    'crate'=>$request->crate,
+                    'vol_m3'=>$request->vol,
+                    'harga_vol_m3'=>$harga,
+                    'total_harga'=>$total_harga,
+                ];
+            }else{
+                $dataPenjualan=[
+                    'kode_penjualan'=>$kode,
+                    'tanggal'=>$newDate,
+                    'supplier'=>$request->supplier,
+                    'alamat'=>$request->alamat,
+                    'id_master'=>$request->grade,
+                    'grade'=>$m->hasil_produksi,
+                    'jenis_kayu'=>$request->jenis_kayu,
+                    'ukuran1'=>$request->ukuran,
+                    'crate'=>$request->crate,
+                    'vol_m3'=>$request->vol,
+                    'harga_vol_m3'=>$harga,
+                    'total_harga'=>$total_harga,
+                ];
+            }
         }else{
             $dataPenjualan=[
-                'kode_penjualan'=>$kode,
-                'tanggal'=>$newDate,
-                'supplier'=>$request->supplier,
-                'alamat'=>$request->alamat,
-                'id_master'=>$request->grade,
-                'grade'=>$m->hasil_produksi,
-                'jenis_kayu'=>$request->jenis_kayu,
-                'ukuran1'=>$request->ukuran,
-                'crate'=>$request->crate,
-                'vol_m3'=>$request->vol,
-                'harga_vol_m3'=>$harga,
-                'total_harga'=>$total_harga,
-            ];
+                    'kode_penjualan'=>$kode,
+                    'tanggal'=>$newDate,
+                    'supplier'=>$request->supplier,
+                    'alamat'=>$request->alamat,
+                    'id_master'=>$request->grade,
+                    'grade'=>'lainnya',
+                    'jenis_kayu'=>$request->jenis_kayu,
+                    'ukuran1'=>$request->ukuran,
+                    'crate'=>$request->crate,
+                    'vol_m3'=>$request->vol,
+                    'harga_vol_m3'=>$harga,
+                    'total_harga'=>$total_harga,
+                ];
         }
 
         $dataLog=[
@@ -101,27 +119,58 @@ class PenjualanController extends Controller
             'harga'=>$total_harga,
             'ket'=>'jual',
         ];
-        $dataStock=[
-            'kode'=>$kode,
-            'tanggal'=>$newDate,
-            'supplier'=>$request->supplier,
-            'volume'=>$request->vol,
-            'harga'=>$total_harga,
-            'harga_master'=>$m->harga,
-            'ket'=>'keluar',
-        ];
+        if(count($master)!=0){
+            if($m->id==5){
+                $dataStock=[
+                    'kode'=>$kode,
+                    'tanggal'=>$newDate,
+                    'supplier'=>$request->supplier,
+                    'volume'=>$request->ukuran,
+                    'harga'=>$total_harga,
+                    'harga_master'=>$m->harga,
+                    'ket'=>'keluar',
+                ];
+            }else{
+                $dataStock=[
+                'kode'=>$kode,
+                'tanggal'=>$newDate,
+                'supplier'=>$request->supplier,
+                'volume'=>$request->vol,
+                'harga'=>$total_harga,
+                'harga_master'=>$m->harga,
+                'ket'=>'keluar',
+            ];
+            }
+
+        }else{
+            $dataStock=[
+                'kode'=>$kode,
+                'tanggal'=>$newDate,
+                'supplier'=>$request->supplier,
+                'volume'=>$request->vol,
+                'harga'=>$total_harga,
+                'harga_master'=>'',
+                'ket'=>'keluar',
+            ];
+        }
+
         // dd($dataPenjualan);
         DB::beginTransaction();
         try{
             Penjualan::create($dataPenjualan);
             // LogOpc::create($dataLog);
-            if($m->id==1){
-                StockLogOpc::create($dataStock);
-            }else if($m->id==3){
-                StockLogPpc::create($dataStock);
-            }else if($m->id==4){
-                StockLogMk::create($dataStock);
+            if(count($master)!=0){
+                if($m->id==1){
+                    StockLogOpc::create($dataStock);
+                }else if($m->id==3){
+                    StockLogPpc::create($dataStock);
+                }else if($m->id==4){
+                    StockLogMk::create($dataStock);
+                }else if($m->id==5){
+                    StockLogAmpulur::create($dataStock);
+                }
             }
+
             DB::commit();
             return redirect("/penjualan")->with('success','Data berhasil ditambahkan!');
         }catch(Exception $e){
@@ -165,13 +214,14 @@ class PenjualanController extends Controller
 
         // dd($request->grade);
         $master=HasilProduk::where('hasil_produksi',$request->grade)->get();
+        // dd($master);
         foreach($master as $m){}
-        if($request->grade==1){
+        if($m->id==1){
             $dataPenjualan=[
                 'supplier'=>$request->supplier,
                 'alamat'=>$request->alamat,
                 'id_master'=>$request->id_master,
-                'grade'=>$m->hasil_produksi,
+                'grade'=>$m->id,
                 'jenis_kayu'=>$request->jenis_kayu,
                 'ukuran1'=>$request->ukuran1,
                 'ukuran2'=>$request->ukuran2,
@@ -187,7 +237,7 @@ class PenjualanController extends Controller
                 'supplier'=>$request->supplier,
                 'alamat'=>$request->alamat,
                 'id_master'=>$request->grade,
-                'grade'=>$m->hasil_produksi,
+                'grade'=>$m->id,
                 'jenis_kayu'=>$request->jenis_kayu,
                 'ukuran1'=>$request->ukuran,
                 'crate'=>$request->crate,
@@ -220,6 +270,8 @@ class PenjualanController extends Controller
                 StockLogPpc::where('kode',$kodePenjualan)->update($dataStock);
             }else if($m->id==4){
                 StockLogMk::where('kode',$kodePenjualan)->update($dataStock);
+            }else if($m->id==5){
+                StockLogAmpulur::where('kode',$kodePenjualan)->update($dataStock);
             }
             DB::commit();
             return redirect("/penjualan")->with('success','Data berhasil diubah!');
@@ -247,6 +299,7 @@ class PenjualanController extends Controller
             StockLogMk::where('kode',$kodePenjualan)->delete();
             StockLogOpc::where('kode',$kodePenjualan)->delete();
             StockLogPpc::where('kode',$kodePenjualan)->delete();
+            StockLogAmpulur::where('kode',$kodePenjualan)->delete();
             DB::commit();
             return redirect("/penjualan")->with('success','Data berhasil dihapus!');
         }catch(Exception $e){

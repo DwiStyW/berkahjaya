@@ -82,10 +82,10 @@
                                                     class="px-2 btn-sm btn-warning"><i class="uil uil-eye font-size-18"></i>
                                                     Detail</a>
                                             </li>
-                                            <li class="list-inline-item">
+                                            {{-- <li class="list-inline-item">
                                                 <a href="penjualan-edit/{{ Crypt::encrypt($item->id) }}"
                                                     class="px-2 text-primary"><i class="uil uil-pen font-size-18"></i></a>
-                                            </li>
+                                            </li> --}}
                                             <li class="list-inline-item">
                                                 <a onclick="hapus('{{ Crypt::encrypt($item->id) }}')" data-bs-toggle="modal"
                                                     data-bs-target="#hapusmodal" class="px-2 text-danger">

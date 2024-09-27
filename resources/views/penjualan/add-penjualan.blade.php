@@ -64,6 +64,7 @@
                                         @foreach ($mateng as $m)
                                             <option value="{{ $m->id }}">{{ $m->hasil_produksi }}</option>
                                         @endforeach
+                                        <option value="lainnya">Lainnya</option>
                                     </select>
                                     <div id="stock"></div>
                                 </div>
@@ -102,12 +103,14 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="mb-3 row">
-                                <label for="vol" class="col-md-2 col-form-label">Vol/m3</label>
-                                <div class="col-md-10">
-                                    <input class="form-control" type="text" placeholder="0.00" id="vol"
-                                        oninput="hitungTotal()" name="vol"
-                                        title="gunakan titik(.) untuk menggantikan koma(,)">
+                            <div id="Fvol">
+                                <div class="mb-3 row">
+                                    <label for="vol" class="col-md-2 col-form-label">Vol/m3</label>
+                                    <div class="col-md-10">
+                                        <input class="form-control" type="text" placeholder="0.00" id="vol"
+                                            oninput="hitungTotal()" name="vol"
+                                            title="gunakan titik(.) untuk menggantikan koma(,)">
+                                    </div>
                                 </div>
                             </div>
                             <div id="Fcrate">
@@ -120,7 +123,7 @@
                                 </div>
                             </div>
                             <div class="mb-3 row">
-                                <label for="harga" class="col-md-2 col-form-label">Harga/m3</label>
+                                <label for="harga" class="col-md-2 col-form-label">Harga/satuan</label>
                                 <div class="col-md-10">
                                     <input class="form-control" type="text" data-type="currency"
                                         placeholder="Rp 0,00" id="harga" name="harga" oninput="hitungTotal()">
@@ -161,7 +164,7 @@
 
         function pilih_grade() {
             var grade = document.getElementById("grade").value;
-            // console.log(grade);
+            console.log(grade);
             $.ajax({
                 type: 'POST',
                 url: "{{ route('getStock') }}",
@@ -212,16 +215,23 @@
                         }
                         str = '<h6 class="mt-2 ms-1">Stock : ' + saldomutasi1V.toFixed(4) + '</h6>';
                         document.getElementById('stock').innerHTML = str;
+                        document.getElementById('stock').style.display = 'block';
                         // console.log(saldomutasi1V.toFixed(4));
                     } else {
-                        str = '<h6 class="mt-2 ms-1">Stock : ' + 0 + '</h6>';
-                        document.getElementById('stock').innerHTML = str;
+                        if (grade != 'lainnya') {
+                            str = '<h6 class="mt-2 ms-1">Stock : ' + 0 + '</h6>';
+                            document.getElementById('stock').innerHTML = str;
+                            document.getElementById('stock').style.display = 'block';
+                        } else {
+                            document.getElementById('stock').style.display = 'none';
+                        }
+
                     }
                 }
             });
-            if (grade == 3 || grade == 4) {
+            if (grade == 3) {
                 html = '<div class="mb-3 row">';
-                html += '    <label for="vol" class="col-md-2 col-form-label">Ukuran</label>';
+                html += '    <label for="vol" class="col-md-2 col-form-label">Jumlah</label>';
                 html += '    <div class="col-md-10">';
                 html += '        <input class="form-control" type="number" placeholder="0.00" id="ukuran"';
                 html += '            oninput="hitungVol()" name="ukuran">';
@@ -232,10 +242,54 @@
                 document.getElementById('ukuran_pergrade').style.display = 'block';
                 document.getElementById('opc').style.display = 'none';
                 document.getElementById('Fcrate').style.display = 'none';
+                document.getElementById('Fvol').style.display = 'block';
+            } else if (grade == 4) {
+                html = '<div class="mb-3 row">';
+                html += '    <label for="vol" class="col-md-2 col-form-label">Jumlah</label>';
+                html += '    <div class="col-md-10">';
+                html += '        <input class="form-control" type="number" placeholder="0.00" id="ukuran"';
+                html += '            oninput="hitungVol()" name="ukuran">';
+                html += '    </div>';
+                html += '</div>';
+
+                document.getElementById('ukuran_pergrade').innerHTML = html;
+                document.getElementById('ukuran_pergrade').style.display = 'block';
+                document.getElementById('opc').style.display = 'none';
+                document.getElementById('Fcrate').style.display = 'none';
+                document.getElementById('Fvol').style.display = 'block';
+            } else if (grade == 5) {
+                html = '<div class="mb-3 row">';
+                html += '    <label for="vol" class="col-md-2 col-form-label">Jumlah</label>';
+                html += '    <div class="col-md-10">';
+                html += '        <input class="form-control" type="number" placeholder="0.00" id="ukuran"';
+                html += '            oninput="hitungTotal()" name="ukuran">';
+                html += '    </div>';
+                html += '</div>';
+
+                document.getElementById('ukuran_pergrade').innerHTML = html;
+                document.getElementById('ukuran_pergrade').style.display = 'block';
+                document.getElementById('opc').style.display = 'none';
+                document.getElementById('Fcrate').style.display = 'none';
+                document.getElementById('Fvol').style.display = 'none';
+            } else if (grade == 'lainnya') {
+                html = '<div class="mb-3 row">';
+                html += '    <label for="vol" class="col-md-2 col-form-label">Jumlah</label>';
+                html += '    <div class="col-md-10">';
+                html += '        <input class="form-control" type="number" placeholder="0.00" id="ukuran"';
+                html += '            oninput="hitungTotal()" name="ukuran">';
+                html += '    </div>';
+                html += '</div>';
+
+                document.getElementById('ukuran_pergrade').innerHTML = html;
+                document.getElementById('ukuran_pergrade').style.display = 'block';
+                document.getElementById('opc').style.display = 'none';
+                document.getElementById('Fcrate').style.display = 'none';
+                document.getElementById('Fvol').style.display = 'none';
             } else {
                 document.getElementById('ukuran_pergrade').style.display = 'none';
                 document.getElementById('opc').style.display = 'block';
                 document.getElementById('Fcrate').style.display = 'block';
+                document.getElementById('Fvol').style.display = 'block';
             }
             hitungVol()
         }
@@ -262,13 +316,23 @@
                 document.getElementById('vol').value = vol.toFixed(4);
             }
 
+
         }
 
         function hitungTotal() {
+            var grade = document.getElementById("grade").value;
             var vol = document.getElementById('vol').value;
             var harga = document.getElementById('harga').value;
             var number = Number(harga.replace(/[^0-9,-]+/g, ""));
-            var total = vol * number;
+            // console.log(harga);
+            console.log(number);
+            if (grade == 5 || grade == 'lainnya') {
+                var ukuran = document.getElementById('ukuran').value;
+                var total = ukuran * number;
+            } else {
+                var total = vol * number;
+            }
+
             var rupiah = new Intl.NumberFormat("id-ID", {
                 style: "currency",
                 currency: "IDR"

@@ -5,14 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Operasional extends Model
+class StockLogAmpulur extends Model
 {
     use HasFactory;
-    protected $table="operasional";
+    protected $table="stock_ampulur";
     protected $fillable=[
+        'kode',
         'tanggal',
-        'uraian',
-        'kategori',
+        'supplier',
+        'volume',
         'harga',
+        'harga_master',
+        'ket',
     ];
 }

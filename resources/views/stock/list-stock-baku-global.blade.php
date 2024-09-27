@@ -549,6 +549,71 @@
                                     @endif
                                 @endif
                             </tr>
+                            <tr>
+                                @php
+                                    $no_ampulur = 1;
+                                @endphp
+                                @if (count($stockampulur) != 0)
+                                    @foreach ($stockampulur as $ampulur)
+                                        @php
+                                            if ($ampulur->ket == 'masuk') {
+                                                $saldoVM_ampulur = $ampulur->volume;
+                                                $saldoVK_ampulur = 0;
+                                                $saldoHM_ampulur = $ampulur->harga;
+                                                $saldoHK_ampulur = 0;
+                                            } else {
+                                                $saldoVM_ampulur = 0;
+                                                $saldoVK_ampulur = $ampulur->volume;
+                                                $saldoHM_ampulur = 0;
+                                                $saldoHK_ampulur = $ampulur->volume * $ampulur->harga_master;
+                                            }
+                                        @endphp
+                                        @if ($no_ampulur == 1)
+                                            @php
+                                                $no_ampulur++;
+                                                // volume
+                                                $saldomutasiV_ampulur = 0 + $saldoVM_ampulur - $saldoVK_ampulur;
+                                                if ($saldoVM_ampulur > 0) {
+                                                    $saldomutasi1V_ampulur = $saldomutasiV_ampulur + $saldoVK_ampulur;
+                                                } else {
+                                                    $saldomutasi1V_ampulur = $saldomutasiV_ampulur - $saldoVM_ampulur;
+                                                }
+                                                // harga
+                                                $saldomutasiH_ampulur = 0 + $saldoHM_ampulur - $saldoHK_ampulur;
+                                                if ($saldoHM_ampulur > 0) {
+                                                    $saldomutasi1H_ampulur = $saldomutasiH_ampulur + $saldoHK_ampulur;
+                                                } else {
+                                                    $saldomutasi1H_ampulur = $saldomutasiH_ampulur - $saldoHM_ampulur;
+                                                }
+                                            @endphp
+                                        @else
+                                            @php
+                                                $no_ampulur++;
+                                                // volume
+                                                $sals1V_ampulur = $saldomutasi1V_ampulur;
+                                                $saldomutasi1V_ampulur =
+                                                    $sals1V_ampulur + $saldoVM_ampulur - $saldoVK_ampulur;
+                                                // harga
+                                                $sals1H_ampulur = $saldomutasi1H_ampulur;
+                                                $saldomutasi1H_ampulur =
+                                                    $sals1H_ampulur + $saldoHM_ampulur - $saldoHK_ampulur;
+                                            @endphp
+                                        @endif
+                                    @endforeach
+                                    <th>Ampulur</th>
+                                    <td>
+                                        @if (round($saldomutasi1V_ampulur, 4) == -0)
+                                            {{ 0 }}
+                                        @else
+                                            {{ round($saldomutasi1V_ampulur, 4) }}
+                                        @endif
+                                    </td>
+                                    @if (Auth::user()->role == '1')
+                                        <td>{{ 'Rp ' . number_format($saldomutasi1H_ampulur, 0, ',', '.') }}</td>
+                                    @endif
+                                @endif
+                            </tr>
+
                         </tbody>
                         <tbody>
                             <tr>
@@ -566,10 +631,15 @@
                                         $saldomutasi1V_mk = 0;
                                         $saldomutasi1H_mk = 0;
                                     }
+                                    if (count($stockampulur) == 0) {
+                                        $saldomutasi1V_ampulur = 0;
+                                        $saldomutasi1H_ampulur = 0;
+                                    }
                                 @endphp
-                                <th>{{ round($saldomutasi1V_opc + $saldomutasi1V_ppc + $saldomutasi1V_mk, 4) }}</th>
+                                <th>{{ round($saldomutasi1V_opc + $saldomutasi1V_ppc + $saldomutasi1V_mk + $saldomutasi1V_ampulur, 4) }}
+                                </th>
                                 @if (Auth::user()->role == '1')
-                                    <th>{{ 'Rp ' . number_format($saldomutasi1H_opc + $saldomutasi1H_ppc + $saldomutasi1H_mk, 0, ',', '.') }}
+                                    <th>{{ 'Rp ' . number_format($saldomutasi1H_opc + $saldomutasi1H_ppc + $saldomutasi1H_mk + $saldomutasi1H_ampulur, 0, ',', '.') }}
                                     </th>
                                 @endif
                             </tr>

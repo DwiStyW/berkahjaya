@@ -35,9 +35,9 @@
         }
 
         /* table.dataTable.cell-border tbody tr:first-child th,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                table.dataTable.cell-border tbody tr:first-child td {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    border-top: none;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                } */
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                table.dataTable.cell-border tbody tr:first-child td {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    border-top: none;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                } */
     </style>
 @endsection
 @section('content')
@@ -76,6 +76,13 @@
                                 <div class="col-md-10">
                                     <input class="form-control" type="text" placeholder="nama supplier" id="supplier"
                                         name="supplier">
+                                </div>
+                            </div>
+                            <div class="mb-3 row">
+                                <label for="no_truk" class="col-md-2 col-form-label">No Truk</label>
+                                <div class="col-md-10">
+                                    <input class="form-control" placeholder="X 0000 XX" id="no_truk" name="no_truk"
+                                        oninput="setTruk()">
                                 </div>
                             </div>
                             <div class="mb-3 row">
@@ -676,9 +683,14 @@
             document.getElementById('supplier').value = supplier;
         }
 
+        if (localStorage.getItem("no_truk") != '') {
+            document.getElementById('no_truk').value = localStorage.getItem("no_truk");
+        }
+
         function resetVal(n) {
             localStorage.removeItem("tanggal");
             localStorage.removeItem("supplier");
+            localStorage.removeItem("no_truk");
             tanggal = document.getElementById('tanggal').value;
             supplier = document.getElementById('supplier').value;
 
@@ -694,6 +706,10 @@
                 document.getElementById('harga_rupiah' + n).value = rp(harga);
             }
             hitung(n)
+        }
+
+        function setTruk() {
+            localStorage.setItem("no_truk", document.getElementById('no_truk').value);
         }
     </script>
 @endsection

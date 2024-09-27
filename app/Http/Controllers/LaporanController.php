@@ -29,8 +29,8 @@ class LaporanController extends Controller
         // dump($laporan);
         // masuk keluar
         $pembelian=DB::select("SELECT * from pembelian where tanggal >= '$newDateAwal' and tanggal <= '$newDateAkhir'");
-        $penjualanOpc=DB::select("SELECT * from penjualan where (tanggal >= '$newDateAwal' and tanggal <= '$newDateAkhir') and id_master='1' order by tanggal asc");
-        $penjualanLimbah=DB::select("SELECT * from penjualan where (tanggal >= '$newDateAwal' and tanggal <= '$newDateAkhir') and id_master!='1'");
+        $penjualanOpc=DB::select("SELECT * from penjualan where (tanggal >= '$newDateAwal' and tanggal <= '$newDateAkhir') and (id_master='1' or id_master='OPC') order by tanggal asc");
+        $penjualanLimbah=DB::select("SELECT * from penjualan where (tanggal >= '$newDateAwal' and tanggal <= '$newDateAkhir') and (id_master!='1' and id_master!='OPC')");
 
         // stock log
         $stockSengon=DB::select("SELECT * from stock_log_masuk where tanggal <= '$newDateAkhir'");
@@ -42,21 +42,28 @@ class LaporanController extends Controller
         $stockMk=DB::select("SELECT * from stock_mk where tanggal <= '$newDateAkhir'");
 
         // operasional
-        $operasional=DB::select("SELECT * from operasional where tanggal >= '$newDateAwal' and tanggal <= '$newDateAkhir'");
-
+        $operasional=DB::select("SELECT * from operasional where (tanggal >= '$newDateAwal' and tanggal <= '$newDateAkhir') and kategori is NULL");
+        $operasional_kat=DB::select("SELECT kategori,sum(harga) as harga from operasional where (tanggal >= '$newDateAwal' and tanggal <= '$newDateAkhir') and kategori is not NULL
+                group by kategori");
+        // dd($operasional_kat);
         // produksi
         $produksi=DB::select("SELECT * from produksi where  tanggal >= '$newDateAwal' and tanggal <= '$newDateAkhir'");
         $produksiGroup=DB::select("SELECT tanggal,kode_produksi,log_opc,harga_log from produksi where  tanggal >= '$newDateAwal' and tanggal <= '$newDateAkhir' group by tanggal,kode_produksi,log_opc,harga_log");
 
         // hitung total beli
+        $arr_truk=[];
         $arr_beliVol=[];
         $arr_beliHarga=[];
         foreach($pembelian as $beli){
+            array_push($arr_truk,$beli->jumlah_truk);
             array_push($arr_beliVol,$beli->vol);
             array_push($arr_beliHarga,$beli->total_harga);
         }
+        $jumlah_truk=array_sum($arr_truk);
         $total_beliVol=array_sum($arr_beliVol);
         $total_beliHarga=array_sum($arr_beliHarga);
+
+        $harga_truk=$jumlah_truk*100000;
 
         // hitung jual opc
         $arr_jualOpcVol=[];
@@ -197,14 +204,21 @@ class LaporanController extends Controller
         $total_slHarga=$total_ssHarga+$total_skHarga;
         // dd($total_skHarga);
 
-        // hitung beban operasional
+        // hitung beban operasional NULL kat
         $arr_opHarga=[];
         foreach($operasional as $oper){
             array_push($arr_opHarga,$oper->harga);
         }
         $total_operasional=array_sum($arr_opHarga);
 
-                // hitung beban operasional
+        // hitung beban operasional with kat
+        $arr_opHarga_kat=[];
+        foreach($operasional_kat as $oper_kat){
+            array_push($arr_opHarga_kat,$oper_kat->harga);
+        }
+        $total_operasional_kat=array_sum($arr_opHarga_kat);
+
+        // hitung produksi
         $arr_proVol=[];
         $arr_proHarga=[];
         foreach($produksiGroup as $pro){
@@ -213,11 +227,13 @@ class LaporanController extends Controller
         }
         $total_proVol=array_sum($arr_proVol);
         $total_proHarga=array_sum($arr_proHarga);
+// dd($total_proVol);
+
         return view('laporan.tampil-laporan',compact(
             'tgl_awal','tgl_akhir','newDateAwal','newDateAkhir','total_beliVol','total_beliHarga','penjualanOpc',
             'total_jualOpcVol','total_jualOpcHarga','total_soVol','total_soHarga','total_spVol','total_spHarga','total_smVol','total_smHarga',
-            'total_slVol','total_slHarga','penjualanLimbah','total_jualLimbahHarga','operasional','total_operasional',
-            'total_proVol','total_proHarga'));
+            'total_slVol','total_slHarga','penjualanLimbah','total_jualLimbahHarga','operasional','total_operasional','operasional_kat','total_operasional_kat',
+            'total_proVol','total_proHarga','jumlah_truk','harga_truk'));
     }
 
     public function produksi($newDateAwal,$newDateAkhir){

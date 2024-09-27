@@ -7,6 +7,7 @@ use App\Models\HasilProduk;
 use App\Models\LogOpc;
 use App\Models\Pembelian;
 use App\Models\Produksi;
+use App\Models\StockLogAmpulur;
 use App\Models\StockLogMasuk;
 use App\Models\StockLogMasukKeras;
 use App\Models\StockLogMasukKeras260;
@@ -244,6 +245,8 @@ class ProduksiController extends Controller
         $arr_Hppc=[];
         $arr_Vmk=[];
         $arr_Hmk=[];
+        $arr_Vampulur=[];
+        $arr_Hampulur=[];
         $cariOPC=Temporary::where('status',null)
             ->get();
         // dd($cariOPC);
@@ -288,6 +291,10 @@ class ProduksiController extends Controller
                 array_push($arr_Vmk,$opc->ukuran);
                 array_push($arr_Hmk,$opc->total);
             }
+            if($opc->id_produk=='5'){
+                array_push($arr_Vampulur,$opc->pcs);
+                array_push($arr_Hampulur,$opc->total);
+            }
         }
         $id_sup=$opc->id_supplier;
         $idSup=explode(",",$id_sup);
@@ -299,6 +306,8 @@ class ProduksiController extends Controller
         $sum_Hppc=array_sum($arr_Hppc);
         $sum_Vmk=array_sum($arr_Vmk)*122*122*70/100000000;
         $sum_Hmk=array_sum($arr_Hmk);
+        $sum_Vampulur=array_sum($arr_Vampulur);
+        $sum_Hampulur=array_sum($arr_Hampulur);
 
         $dataStockOpc=[
             'kode'=>$opc->kode_produksi,
@@ -324,6 +333,14 @@ class ProduksiController extends Controller
             'supplier'=>$opc->supplier,
             'volume'=>$sum_Vmk,
             'harga'=>$sum_Hmk,
+            'ket'=>'masuk',
+        ];
+        $dataStockAmpulur=[
+            'kode'=>$opc->kode_produksi,
+            'tanggal'=>$opc->tanggal,
+            'supplier'=>$opc->supplier,
+            'volume'=>$sum_Vampulur,
+            'harga'=>$sum_Hampulur,
             'ket'=>'masuk',
         ];
         // END STOCK
@@ -486,6 +503,7 @@ class ProduksiController extends Controller
                 ];
                 Produksi::where('id',$dp->id)->update($dataAMP);
                 Temporary::where('id',$amp->id)->update(['status'=>'move']);
+                StockLogAmpulur::create($dataStockAmpulur);
             }
 
 
@@ -931,7 +949,11 @@ class ProduksiController extends Controller
                 // dump(LogOpc::where('kode',$cssk->kode)->get());
                 // dump($lognya->stat_sengon,$lognya->stat_keras);
                 // if($cssk->stat_sengon==null && $cssk->stat_keras==null){
-                if(($lognya->stat_sengon && $lognya->stat_keras)==null){
+                if((($lognya->stat_sengon && $lognya->stat_keras)==null)){
+                    LogOpc::where('kode',$cssk->kode)->update(['status'=>null]);
+                    // dump(LogOpc::where('kode',$cssk->kode)->get());
+                }
+                if(($lognya->stat_sengon=='L' && $lognya->stat_keras=='P')){
                     LogOpc::where('kode',$cssk->kode)->update(['status'=>null]);
                     // dump(LogOpc::where('kode',$cssk->kode)->get());
                 }
@@ -952,6 +974,9 @@ class ProduksiController extends Controller
                     LogOpc::where('kode',$cskk->kode)->update(['status'=>null]);
 
                 }
+                if(($loglagi->stat_sengon=='L'&&$loglagi->stat_keras=='P')){
+                    LogOpc::where('kode',$cskk->kode)->update(['status'=>null]);
+                }
                 if(($loglagi->stat_sengon=='L'&&$loglagi->stat_keras==null)||($loglagi->stat_sengon==null&&$loglagi->stat_keras=='L')){
                     LogOpc::where('kode',$cskk->kode)->update(['status'=>'proses']);
                 }
@@ -968,6 +993,7 @@ class ProduksiController extends Controller
             StockLogOpc::where('kode',$kode)->delete();
             StockLogPpc::where('kode',$kode)->delete();
             StockLogMk::where('kode',$kode)->delete();
+            StockLogAmpulur::where('kode',$kode)->delete();
 
 
 

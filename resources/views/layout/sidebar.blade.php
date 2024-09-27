@@ -151,6 +151,7 @@
                         <li><a href="/stockopc">Stock OPC</a></li>
                         <li><a href="/stockppc">Stock PPC</a></li>
                         <li><a href="/stockmk">Stock MK</a></li>
+                        <li><a href="/stockampulur">Stock Ampulur</a></li>
                     </ul>
                 </li>
                 @if (Auth::user()->role == '1')
